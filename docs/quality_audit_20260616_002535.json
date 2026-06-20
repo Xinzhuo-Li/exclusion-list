@@ -1,0 +1,310 @@
+{
+  "generated_at": "2026-06-16T00:24:54.200013",
+  "summary": {
+    "all_reruns_consistent": true,
+    "total_cleaned_records": 8396
+  },
+  "source_vs_processed_counts": [
+    {
+      "state": "MD",
+      "source_rows": 1612,
+      "processed_rows": 1612,
+      "delta": 0
+    },
+    {
+      "state": "MA",
+      "source_rows": 294,
+      "processed_rows": 294,
+      "delta": 0
+    },
+    {
+      "state": "MI",
+      "source_rows": 3982,
+      "processed_rows": 3982,
+      "delta": 0
+    },
+    {
+      "state": "MS",
+      "source_rows": 194,
+      "processed_rows": 194,
+      "delta": 0
+    },
+    {
+      "state": "MT",
+      "source_rows": 174,
+      "processed_rows": 174,
+      "delta": 0
+    },
+    {
+      "state": "NE",
+      "source_rows": 1391,
+      "processed_rows": 1391,
+      "delta": 0
+    }
+  ],
+  "rerun_consistency": [
+    {
+      "state": "MD",
+      "raw_rows": 1612,
+      "rerun_cleaned": 1610,
+      "csv_cleaned": 1610,
+      "missing_in_csv": 0,
+      "extra_in_csv": 0,
+      "duplicate_keys_in_csv": 0,
+      "field_mismatches": 0,
+      "field_mismatch_samples": [],
+      "missing_samples": [],
+      "extra_samples": [],
+      "consistent": true
+    },
+    {
+      "state": "MA",
+      "raw_rows": 294,
+      "rerun_cleaned": 294,
+      "csv_cleaned": 294,
+      "missing_in_csv": 0,
+      "extra_in_csv": 0,
+      "duplicate_keys_in_csv": 0,
+      "field_mismatches": 0,
+      "field_mismatch_samples": [],
+      "missing_samples": [],
+      "extra_samples": [],
+      "consistent": true
+    },
+    {
+      "state": "MI",
+      "raw_rows": 3982,
+      "rerun_cleaned": 4735,
+      "csv_cleaned": 4735,
+      "missing_in_csv": 0,
+      "extra_in_csv": 0,
+      "duplicate_keys_in_csv": 0,
+      "field_mismatches": 0,
+      "field_mismatch_samples": [],
+      "missing_samples": [],
+      "extra_samples": [],
+      "consistent": true
+    },
+    {
+      "state": "MS",
+      "raw_rows": 194,
+      "rerun_cleaned": 193,
+      "csv_cleaned": 193,
+      "missing_in_csv": 0,
+      "extra_in_csv": 0,
+      "duplicate_keys_in_csv": 0,
+      "field_mismatches": 0,
+      "field_mismatch_samples": [],
+      "missing_samples": [],
+      "extra_samples": [],
+      "consistent": true
+    },
+    {
+      "state": "MT",
+      "raw_rows": 174,
+      "rerun_cleaned": 174,
+      "csv_cleaned": 174,
+      "missing_in_csv": 0,
+      "extra_in_csv": 0,
+      "duplicate_keys_in_csv": 0,
+      "field_mismatches": 0,
+      "field_mismatch_samples": [],
+      "missing_samples": [],
+      "extra_samples": [],
+      "consistent": true
+    },
+    {
+      "state": "NE",
+      "raw_rows": 1391,
+      "rerun_cleaned": 1390,
+      "csv_cleaned": 1390,
+      "missing_in_csv": 0,
+      "extra_in_csv": 0,
+      "duplicate_keys_in_csv": 0,
+      "field_mismatches": 0,
+      "field_mismatch_samples": [],
+      "missing_samples": [],
+      "extra_samples": [],
+      "consistent": true
+    }
+  ],
+  "format_checks": [
+    {
+      "state": "MD",
+      "invalid_npi_count": 0,
+      "invalid_date_count": 0,
+      "empty_name_count": 0,
+      "truncated_busname_count": 8,
+      "empty_name_samples": [],
+      "truncated_busname_samples": [
+        "Adoni Healthcare Services, LLC",
+        "BMA Health Care Services, Inc.",
+        "BMA Health Care Services, Inc.",
+        "CHRONIC PAIN TREATMENT CENTERS",
+        "Personal Touch Medical SPA LLP"
+      ]
+    },
+    {
+      "state": "MA",
+      "invalid_npi_count": 0,
+      "invalid_date_count": 0,
+      "empty_name_count": 0,
+      "truncated_busname_count": 1,
+      "empty_name_samples": [],
+      "truncated_busname_samples": [
+        "MEDICAL COMMUNITY SERVICES INC"
+      ]
+    },
+    {
+      "state": "MI",
+      "invalid_npi_count": 0,
+      "invalid_date_count": 0,
+      "empty_name_count": 0,
+      "truncated_busname_count": 31,
+      "empty_name_samples": [],
+      "truncated_busname_samples": [
+        "A Dental Center PC - Southgate",
+        "Advanced Medical Services PLLC",
+        "Advanced Medical Services PLLC",
+        "Alfred Associates Incorporated",
+        "Dearborn Podiatric Surgeons PC"
+      ]
+    },
+    {
+      "state": "MS",
+      "invalid_npi_count": 0,
+      "invalid_date_count": 0,
+      "empty_name_count": 0,
+      "truncated_busname_count": 1,
+      "empty_name_samples": [],
+      "truncated_busname_samples": [
+        "Proove Medical Labortories Inc"
+      ]
+    },
+    {
+      "state": "MT",
+      "invalid_npi_count": 0,
+      "invalid_date_count": 0,
+      "empty_name_count": 0,
+      "truncated_busname_count": 0,
+      "empty_name_samples": [],
+      "truncated_busname_samples": []
+    },
+    {
+      "state": "NE",
+      "invalid_npi_count": 0,
+      "invalid_date_count": 0,
+      "empty_name_count": 0,
+      "truncated_busname_count": 4,
+      "empty_name_samples": [],
+      "truncated_busname_samples": [
+        "Donat, Bill (dba BD Rehab Inc)",
+        "Fidelity Home Health Care, LLC",
+        "Just In Time Medical Transport",
+        "Wanek Pharmacy (CW INC DBA as)"
+      ]
+    }
+  ],
+  "spot_checks": [
+    {
+      "state": "MD",
+      "row": 2,
+      "source_name": "A & A Medical Supply Company / ",
+      "source_npi": "",
+      "source_date": "20151029",
+      "clean_npi": "",
+      "clean_date": "20151029",
+      "clean_name": " /  / A & A Medical Supply Company",
+      "match": true
+    },
+    {
+      "state": "MD",
+      "row": 5,
+      "source_name": "Abbas / Muhmoud F",
+      "source_npi": "",
+      "source_date": "19920610",
+      "clean_npi": "",
+      "clean_date": "19920610",
+      "clean_name": "Abbas / Muhmoud F / ",
+      "match": true
+    },
+    {
+      "state": "MD",
+      "row": 7,
+      "source_name": "Abegunde / Abeyinka Daniel",
+      "source_npi": "",
+      "source_date": "20210323",
+      "clean_npi": "",
+      "clean_date": "20210323",
+      "clean_name": "Abegunde / Abeyinka Daniel / ",
+      "match": true
+    },
+    {
+      "state": "MD",
+      "row": 102,
+      "source_name": "Asadi / Katherine",
+      "source_npi": "1124109830",
+      "source_date": "20230927",
+      "clean_npi": "",
+      "clean_date": "20020718",
+      "clean_name": "Asemani / Ghafour B. / ",
+      "match": false
+    },
+    {
+      "state": "MA",
+      "row": 2,
+      "source_name": "HEALTH AND SPORTS REHAB, INC",
+      "source_npi": "1861434250",
+      "source_date": "20260519",
+      "clean_npi": "1861434250",
+      "clean_date": "20260519",
+      "clean_name": "//HEALTH AND SPORTS REHAB, INC",
+      "parsed_name": "//HEALTH AND SPORTS REHAB, INC",
+      "match": true
+    },
+    {
+      "state": "MA",
+      "row": 3,
+      "source_name": "DAVID C FREDENBURG",
+      "source_npi": "1396717658",
+      "source_date": "20260424",
+      "clean_npi": "1396717658",
+      "clean_date": "20260424",
+      "clean_name": "FREDENBURG/DAVID/",
+      "parsed_name": "FREDENBURG/DAVID/",
+      "match": true
+    },
+    {
+      "state": "MA",
+      "row": 4,
+      "source_name": "ANDREW L SORIAL",
+      "source_npi": "1255725602",
+      "source_date": "20260121",
+      "clean_npi": "1255725602",
+      "clean_date": "20260121",
+      "clean_name": "SORIAL/ANDREW/",
+      "parsed_name": "SORIAL/ANDREW/",
+      "match": true
+    },
+    {
+      "state": "MA",
+      "row": 52,
+      "source_name": "CALEB GREER",
+      "source_npi": "1629630702",
+      "source_date": "20240625",
+      "clean_npi": "1629630702",
+      "clean_date": "20240625",
+      "clean_name": "GREER/CALEB/",
+      "parsed_name": "GREER/CALEB/",
+      "match": true
+    }
+  ],
+  "known_limitations": [
+    "OIG field length limits truncate long organization names (BUSNAME max 30).",
+    "MA long provider names and GENERAL values are truncated to OIG limits.",
+    "Deduplication removes rows with identical NPI + name + excldate within a state.",
+    "MS rows with missing key fields are dropped during cleaning.",
+    "NE PDF table extraction may include rows not present in a simple row count.",
+    "Name parsing for individuals vs organizations is heuristic and may differ from source intent."
+  ]
+}
