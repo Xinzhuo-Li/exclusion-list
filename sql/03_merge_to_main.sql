@@ -1,5 +1,6 @@
--- Merge cleaned staging records into the national exclusion_main table.
--- Run after validation passes and cleaned_staging is loaded.
+-- Merge cleaned_staging into exclusion_main (strict sync for six states).
+-- Policy: full row copy of all business columns; no truncation; retain all NPI rows.
+-- Idempotent: DELETE six states then INSERT from cleaned_staging.
 
 DELETE FROM exclusion_main
 WHERE source_state IN ('MD', 'MA', 'MI', 'MS', 'MT', 'NE');

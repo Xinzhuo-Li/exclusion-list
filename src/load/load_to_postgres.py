@@ -152,7 +152,10 @@ def get_connection():
 
 
 def apply_schema(conn) -> None:
-    for sql_file in ("01_create_stage_tables.sql", "02_create_main_table.sql"):
+    for sql_file in (
+        "01_create_stage_tables.sql",
+        "02_create_main_table.sql",
+    ):
         sql_path = ROOT_DIR / "sql" / sql_file
         with sql_path.open(encoding="utf-8") as handle:
             with conn.cursor() as cur:

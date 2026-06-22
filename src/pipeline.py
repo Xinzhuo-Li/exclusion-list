@@ -26,6 +26,16 @@ def merge_to_main() -> None:
     print("Merged cleaned_staging into exclusion_main.")
 
 
+def verify_main_sync() -> None:
+    from src.load.load_to_postgres import ROOT_DIR, get_connection
+
+    sql_path = ROOT_DIR / "sql" / "04_verify_main_sync.sql"
+    with get_connection() as conn, sql_path.open(encoding="utf-8") as handle:
+        with conn.cursor() as cur:
+            cur.execute(handle.read())
+    print("Sync verification complete (see query output above).")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run exclusion list ETL pipeline.")
     parser.add_argument(
@@ -67,6 +77,7 @@ def main() -> None:
 
     print("Step 5: Merge into exclusion_main...")
     merge_to_main()
+    verify_main_sync()
     print("Pipeline complete.")
 
 
