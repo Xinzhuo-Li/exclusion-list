@@ -1,0 +1,153 @@
+"""Shared search and aggregation logic for web UI and REST API."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any
+
+from django.db.models import Count, Max, Q, QuerySet
+
+from .models import DataSource, ExclusionRecord
+
+STATE_NAMES = {
+    "MD": "Maryland",
+    "MA": "Massachusetts",
+    "MI": "Michigan",
+    "MS": "Mississippi",
+    "MT": "Montana",
+    "NE": "Nebraska",
+    "CA": "California",
+    "NY": "New York",
+    "NC": "North Carolina",
+    "ND": "North Dakota",
+    "OH": "Ohio",
+    "NJ": "New Jersey",
+    "PA": "Pennsylvania",
+    "GA": "Georgia",
+    "HI": "Hawaii",
+    "ID": "Idaho",
+    "IL": "Illinois",
+    "IN": "Indiana",
+    "IA": "Iowa",
+    "KS": "Kansas",
+    "KY": "Kentucky",
+    "LA": "Louisiana",
+    "ME": "Maine",
+    "AL": "Alabama",
+    "AK": "Alaska",
+    "AZ": "Arizona",
+    "AR": "Arkansas",
+    "CO": "Colorado",
+    "CT": "Connecticut",
+    "DE": "Delaware",
+    "DC": "District of Columbia",
+    "FL": "Florida",
+    "SC": "South Carolina",
+    "TN": "Tennessee",
+    "TX": "Texas",
+    "VT": "Vermont",
+    "WA": "Washington",
+    "WV": "West Virginia",
+    "WY": "Wyoming",
+    "OIG": "Federal LEIE",
+}
+
+
+@dataclass
+class SearchParams:
+    q: str = ""
+    name: str = ""  # API alias; web form uses q
+    npi: str = ""
+
+
+def parse_search_params(data: dict[str, Any]) -> SearchParams:
+    return SearchParams(
+        q=(data.get("q") or "").strip(),
+        name=(data.get("name") or "").strip(),
+        npi=(data.get("npi") or "").strip(),
+    )
+
+
+def search_exclusions(params: SearchParams) -> QuerySet[ExclusionRecord]:
+    qs = ExclusionRecord.objects.all()
+
+    name_query = params.name or params.q
+    if name_query:
+        qs = qs.filter(
+            Q(lastname__icontains=name_query)
+            | Q(firstname__icontains=name_query)
+            | Q(midname__icontains=name_query)
+            | Q(busname__icontains=name_query)
+        )
+
+    if params.npi:
+        qs = qs.filter(npi=params.npi)
+
+    return qs.order_by("-excldate", "id")
+
+
+def get_source_state_choices() -> list[tuple[str, str]]:
+    rows = (
+        ExclusionRecord.objects.values("source_state")
+        .annotate(count=Count("id"))
+        .order_by("source_state")
+    )
+    choices = []
+    for row in rows:
+        code = row["source_state"]
+        label = STATE_NAMES.get(code, code)
+        choices.append((code, f"{label} ({code}) — {row['count']:,}"))
+    return choices
+
+
+def get_sources() -> list[dict[str, Any]]:
+    """Return available data sources with counts; merge metadata when present."""
+    aggregates = (
+        ExclusionRecord.objects.values("source_state")
+        .annotate(record_count=Count("id"), last_loaded_at=Max("loaded_at"))
+        .order_by("source_state")
+    )
+    metadata = {ds.code: ds for ds in DataSource.objects.all()}
+    sources = []
+    for row in aggregates:
+        code = row["source_state"]
+        meta = metadata.get(code)
+        sources.append(
+            {
+                "code": code,
+                "name": meta.name if meta else STATE_NAMES.get(code, code),
+                "contributor": meta.contributor if meta else "",
+                "record_count": row["record_count"],
+                "last_merged_at": (
+                    meta.last_merged_at.isoformat()
+                    if meta and meta.last_merged_at
+                    else (
+                        row["last_loaded_at"].isoformat()
+                        if row["last_loaded_at"]
+                        else None
+                    )
+                ),
+            }
+        )
+    return sources
+
+
+def get_stats() -> dict[str, Any]:
+    total = ExclusionRecord.objects.count()
+    by_source = list(
+        ExclusionRecord.objects.values("source_state")
+        .annotate(count=Count("id"))
+        .order_by("source_state")
+    )
+    return {
+        "total_records": total,
+        "source_count": len(by_source),
+        "by_source_state": [
+            {
+                "source_state": row["source_state"],
+                "name": STATE_NAMES.get(row["source_state"], row["source_state"]),
+                "count": row["count"],
+            }
+            for row in by_source
+        ],
+    }

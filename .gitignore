@@ -6,3 +6,14 @@ __pycache__/
 .DS_Store
 ~$*.xlsx
 deploy/config.sh
+# Colleague clones live outside repo — see sources/README.md
+colleague-repos/
+../colleague-repos/
+# Pipeline artifacts (regenerable; keep latest via symlink)
+docs/artifacts/runs/*/
+!docs/artifacts/latest
+docs/artifacts/dedup/
+*.docx
+.cursor/
+web/staticfiles/
+*.sqlite3

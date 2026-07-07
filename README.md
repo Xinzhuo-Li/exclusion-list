@@ -1,36 +1,26 @@
-# Six-State Medical Exclusion List ETL
+# 39-State Medicaid Exclusion List ETL + Federal LEIE
 
-ETL pipeline that merges Maryland, Massachusetts, Michigan, Mississippi, Montana, and Nebraska Medicaid exclusion lists into PostgreSQL using the OIG LEIE schema.
+ETL pipeline merging **39 state** Medicaid exclusion lists and **HHS OIG LEIE** into PostgreSQL using the OIG LEIE schema. Includes Django web search (`web/`).
 
 **Repository:** https://github.com/Xinzhuo-Li/medicaid-exclusion-list
 
-**Requirements:** Python 3.10+, pip. PostgreSQL 12+ is optional (needed only for database load/merge).
+**Requirements:** Python 3.10+, pip. PostgreSQL 12+ optional (database load/merge only).
+
+**Production baseline (2026-07):** 173,312 state rows + 83,464 federal = **256,776** total in `exclusion_main`.
 
 ---
 
 ## Quick Start
 
-### Path A — Full ETL (convert + validate + PostgreSQL)
-
 ```bash
 git clone https://github.com/Xinzhuo-Li/medicaid-exclusion-list.git
 cd medicaid-exclusion-list
-pip3 install -r requirements.txt
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
 cp .env.example .env          # edit PostgreSQL credentials
 python3 -m pytest tests/ -q   # optional sanity check
-python3 -m src.pipeline
-```
-
-### Path B — CSV only (no database)
-
-Useful for verifying converts and validations without PostgreSQL:
-
-```bash
-git clone https://github.com/Xinzhuo-Li/medicaid-exclusion-list.git
-cd medicaid-exclusion-list
-pip3 install -r requirements.txt
-python3 -m pytest tests/ -q
-python3 -m src.pipeline --skip-db
+python3 -m src.pipeline --skip-db   # CSV + validate (no DB)
+python3 -m src.pipeline             # full ETL + PostgreSQL
 ```
 
 ---
@@ -40,49 +30,48 @@ python3 -m src.pipeline --skip-db
 ```
 medicaid-exclusion-list/
 ├── data/
-│   ├── raw/              # Source xlsx/pdf (7 files — see data/raw/README.md)
+│   ├── raw/              # 42 source files — see data/raw/README.md
 │   ├── processed/        # State-native CSV (*_raw.csv)
-│   └── cleaned/          # OIG-mapped CSV (*_oig.csv)
+│   └── cleaned/          # OIG-mapped CSV (*_oig.csv) + federal_oig.csv
+├── sources/
+│   ├── CONTRIBUTORS.yaml # Single contributor → state registry
+│   └── */README.md       # Per-contributor notes
 ├── docs/
-│   ├── WORKFLOW.md       # Detailed step-by-step runbook
-│   ├── DATA_INVENTORY.md
-│   ├── STATE_MAPPING.md
-│   └── ISSUES_AND_DECISIONS_BILINGUAL.md
-├── sql/
-│   ├── 01_create_stage_tables.sql
-│   ├── 02_create_main_table.sql
-│   ├── 03_merge_to_main.sql
-│   └── 04_verify_main_sync.sql
+│   ├── guides/           # Runbooks (WORKFLOW, STATE_MAPPING, …)
+│   ├── project/          # Deploy status, audits
+│   ├── artifacts/        # Pipeline JSON outputs
+│   └── scans/            # Colleague repo scans
+├── sql/                  # Stage tables, merge, verify
 ├── src/
-│   ├── clean/            # Shared cleaning utilities
-│   ├── convert/          # Per-state converters
-│   ├── load/             # PostgreSQL loader
+│   ├── convert/          # 39 state + federal_leie converters
 │   ├── validate/         # Validation, audit, run manifest
 │   └── pipeline.py       # End-to-end orchestrator
-├── tests/                # pytest regression tests
-├── deploy/               # Optional remote server scripts
-├── requirements.txt
-└── .env.example
+├── web/                  # Django search UI + API
+├── tests/
+├── deploy/               # Remote vesta sync scripts
+└── requirements.txt
 ```
+
+See [docs/guides/PROJECT_LAYOUT.md](docs/guides/PROJECT_LAYOUT.md) for architecture (canonical vs archive).
 
 ---
 
 ## Source Data
 
-Seven source files must be present in `data/raw/` (included in the repo):
+42 files in `data/raw/` covering 39 states + `LEIE.csv`. Filenames are case-sensitive.
 
-| State | File |
-|-------|------|
-| MD | `Maryland.xlsx` |
-| MA | `Massachusetts.xlsx` |
-| MI | `Michigan.xlsx` |
-| MS | `Mississippi.xlsx` |
-| MT | `Montana.xlsx` |
-| NE | `Nebraska.pdf` |
+| Contributor | States | Cleaned rows |
+|-------------|--------|--------------|
+| Xinzhuo Li | MD, MA, MI, MS, MT, NE | 8,575 |
+| AustinGH32 | CA, NY, NC, ND, OH, NJ, PA | 44,997 |
+| le-luo327 | GA–ME | 13,917 |
+| AmeeBeez | AL, AK, AZ, AR, CO, CT, DE, DC, FL | 90,580 |
+| FredericYan02 | SC, TN, TX, VT, WA, WV, WY | 15,242 |
+| Federal LEIE | OIG | 83,464 |
 
-See [data/raw/README.md](data/raw/README.md) for details. The pipeline reads **xlsx/pdf only** — not CSV — from this folder.
+Full filename table: [data/raw/README.md](data/raw/README.md). Registry: [sources/CONTRIBUTORS.yaml](sources/CONTRIBUTORS.yaml).
 
-Pre-generated outputs in `data/processed/` and `data/cleaned/` allow running validation and tests without re-converting.
+Colleague git clones live **outside** this repo at `../colleague-repos/` — reference only.
 
 ---
 
@@ -94,11 +83,11 @@ python3 -m src.pipeline [OPTIONS]
 
 | Step | What it does | Output |
 |------|--------------|--------|
-| **0** | Record source file SHA256 | `docs/run_manifest_*.json` |
+| **0** | Preflight deps + source file SHA256 | `docs/artifacts/runs/YYYYMMDD/run_manifest_*.json` |
 | **1** | Convert & clean all states | `data/processed/*`, `data/cleaned/*` |
-| **2** | Validate row counts & field quality | `docs/validation_report_*.json` — **fail-fast** |
-| **3** | Rerun consistency audit | `docs/quality_audit_*.json` — **fail-fast** |
-| **4** | Load PostgreSQL stage + staging | `stage_*`, `cleaned_staging` tables |
+| **2** | Validate row counts & field quality | `validation_report_*.json` — **fail-fast** |
+| **3** | Rerun consistency audit | `quality_audit_*.json` — **fail-fast** |
+| **4** | Load PostgreSQL stage + staging | `stage_*`, `cleaned_staging` |
 | **5** | Merge to `exclusion_main` + sync verify | Strict EXCEPT check — **fail-fast** |
 
 ### CLI flags
@@ -108,8 +97,9 @@ python3 -m src.pipeline [OPTIONS]
 | `--skip-nebraska` | Skip Nebraska PDF in Steps 0–1 |
 | `--skip-db` | Stop after Step 3 (no PostgreSQL) |
 | `--skip-merge` | Load tables but do not merge into `exclusion_main` |
+| `--states-only` | Skip federal LEIE convert/validate |
 
-For manual step-by-step commands, see [docs/WORKFLOW.md](docs/WORKFLOW.md).
+Operator runbook: [docs/guides/WORKFLOW.md](docs/guides/WORKFLOW.md).
 
 ---
 
@@ -127,14 +117,6 @@ cp .env.example .env
 | `PGUSER` | Database user | `postgres` |
 | `PGPASSWORD` | Database password | *(required)* |
 
-Create the database before the first full run:
-
-```bash
-createdb exclusion_list
-```
-
-Schema (`01_create_stage_tables.sql`, `02_create_main_table.sql`) is applied automatically by `load_to_postgres`.
-
 ---
 
 ## Testing
@@ -143,33 +125,13 @@ Schema (`01_create_stage_tables.sql`, `02_create_main_table.sql`) is applied aut
 python3 -m pytest tests/ -v
 ```
 
-Tests cover date/NPI/name transforms, Michigan multi-date expansion, Mississippi REINDATE rules, deduplication, and record-count regression against baselines in `docs/DATA_INVENTORY.md`.
+198 tests cover transforms, deduplication, and record-count regression against [docs/guides/DATA_INVENTORY.md](docs/guides/DATA_INVENTORY.md).
 
----
+Local validation shortcut:
 
-## Expected Record Counts
-
-| State | Source rows | Cleaned records |
-|-------|-------------|-----------------|
-| MD | 1,605 | 1,603 |
-| MA | 294 | 294 |
-| MI | 3,982 | 4,921 |
-| MS | 194 | 193 |
-| MT | 174 | 174 |
-| NE | 1,391 | 1,390 |
-| **Total** | **7,640** | **8,575** |
-
-Michigan produces more cleaned records than source rows because dual sanction dates expand into separate records.
-
----
-
-## Target Schema (OIG LEIE)
-
-18 OIG fields plus `source_state`:
-
-`lastname, firstname, midname, busname, general, specialty, upin, npi, dob, address, city, state, zip_code, excltype, excldate, reindate, waiverdate, waiverstate, source_state`
-
-Name fields use PostgreSQL `TEXT` (full length preserved). See [docs/STATE_MAPPING.md](docs/STATE_MAPPING.md).
+```bash
+bash scripts/import_local.sh --states-only
+```
 
 ---
 
@@ -177,50 +139,35 @@ Name fields use PostgreSQL `TEXT` (full length preserved). See [docs/STATE_MAPPI
 
 | Artifact | Location |
 |----------|----------|
-| Run manifest (source file hashes) | `docs/run_manifest_*.json` |
-| Validation report | `docs/validation_report_*.json` |
-| Quality audit | `docs/quality_audit_*.json` |
-| Dedup dropped records | `docs/dedup_dropped_{state}.json` |
+| Latest run | `docs/artifacts/latest/` (symlink) |
+| Run manifest | `docs/artifacts/runs/YYYYMMDD/run_manifest_*.json` |
+| Validation report | `docs/artifacts/runs/YYYYMMDD/validation_report_*.json` |
+| Quality audit | `docs/artifacts/runs/YYYYMMDD/quality_audit_*.json` |
+| Dedup dropped | `docs/artifacts/dedup/dedup_dropped_{state}.json` |
 
 ---
 
-## Troubleshooting
+## Deployment
 
-| Problem | What to do |
-|---------|------------|
-| Missing raw file | Ensure all seven files in `data/raw/` with exact names — see [data/raw/README.md](data/raw/README.md) |
-| Validation failed | Read latest `docs/validation_report_*.json`; check `"checks"` for failing state |
-| Quality audit failed | Re-run convert: `python3 -m src.convert.run_all` |
-| Database connection error | Verify `.env`; test with `psql -h $PGHOST -U $PGUSER -d $PGDATABASE` |
-| Sync verification failed | Re-run merge: `psql ... -f sql/03_merge_to_main.sql` |
-
-More detail: [docs/WORKFLOW.md](docs/WORKFLOW.md).
-
----
-
-## Deployment (Optional)
-
-Remote server sync scripts live in `deploy/`. Copy `deploy/config.example.sh` to `deploy/config.sh` (gitignored) and set your SSH host and paths.
+Remote sync to vesta:
 
 ```bash
-cp deploy/config.example.sh deploy/config.sh
-# edit DEPLOY_HOST, DEPLOY_REMOTE_DIR, PGPORT
+cp deploy/config.example.sh deploy/config.sh   # edit host/credentials
+bash scripts/deploy_vesta.sh
 ```
+
+Web search (production): http://107.181.241.82:8004/search/
+
+Status: [docs/project/colleague_merge_status.json](docs/project/colleague_merge_status.json)
 
 ---
 
 ## Further Reading
 
-- [docs/WORKFLOW.md](docs/WORKFLOW.md) — full operator runbook
-- [docs/DATA_INVENTORY.md](docs/DATA_INVENTORY.md) — columns and data quality
-- [docs/STATE_MAPPING.md](docs/STATE_MAPPING.md) — per-state field mapping
-- [docs/ISSUES_AND_DECISIONS_BILINGUAL.md](docs/ISSUES_AND_DECISIONS_BILINGUAL.md) — business rules (EN + 中文)
+- [docs/guides/PROJECT_LAYOUT.md](docs/guides/PROJECT_LAYOUT.md) — architecture
+- [docs/guides/WORKFLOW.md](docs/guides/WORKFLOW.md) — operator runbook
+- [docs/guides/DATA_INVENTORY.md](docs/guides/DATA_INVENTORY.md) — columns and quality
+- [docs/guides/STATE_MAPPING.md](docs/guides/STATE_MAPPING.md) — per-state field mapping
+- [sources/CONTRIBUTORS.yaml](sources/CONTRIBUTORS.yaml) — contributor registry
 
----
-
-## Notes
-
-- Nebraska PDF is parsed via `pdfplumber` table extraction (no OCR).
-- Excel dates are converted to `YYYYMMDD`.
-- Mississippi indefinite exclusion end dates map to empty `REINDATE`.
-- Cross-state duplicate NPIs are retained as separate rows (see issues doc).
+See [docs/project/RELEASE_STATUS.md](docs/project/RELEASE_STATUS.md) for release checklist and known limitations.

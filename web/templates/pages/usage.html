@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Usage — Medicaid Exclusion List{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Usage Guide</h1>
+
+<section class="mb-4">
+  <h2 class="h4">Web Search</h2>
+  <p>Use the <a href="{% url 'search' %}">Search</a> page to query exclusion records. Two filters are available:</p>
+  <ul>
+    <li><strong>Name</strong> — partial match on first name, middle name, last name, or business name</li>
+    <li><strong>NPI</strong> — exact 10-digit National Provider Identifier</li>
+  </ul>
+  <p class="text-muted mb-0">
+    Reinstated providers are included in search results by default.
+    Source state, list type, and date filters are not available on the search form;
+    use the result table columns to review those fields after a match.
+  </p>
+</section>
+
+<section class="mb-4">
+  <h2 class="h4">REST API</h2>
+  <p>Programmatic access is available at <code>/api/v1/</code>. Interactive documentation:</p>
+  <p><a class="btn btn-outline-primary" href="/api/docs/">Open API Documentation</a></p>
+
+  <h3 class="h5 mt-3">Search parameters</h3>
+  <p>Only <code>q</code> (or <code>name</code>) and <code>npi</code> are supported for filtering exclusions.
+  Other query parameters are ignored.</p>
+
+  <h3 class="h5 mt-3">Example Requests</h3>
+  <pre class="bg-light p-3 rounded"><code># Search by NPI
+curl "{{ base_url }}/api/v1/exclusions/?npi=1234567890"
+
+# Search by name (matches first, middle, last, or business name)
+curl "{{ base_url }}/api/v1/exclusions/?q=Smith"
+
+# API alias for name
+curl "{{ base_url }}/api/v1/exclusions/?name=Action+Pharmacy"
+
+# List data sources
+curl "{{ base_url }}/api/v1/sources/"
+
+# Summary statistics
+curl "{{ base_url }}/api/v1/stats/"</code></pre>
+
+  <p>Pagination: responses include <code>count</code>, <code>next</code>, and <code>previous</code>.
+  Default page size is 50; use <code>?page_size=100</code> (max 200).</p>
+</section>
+
+<section class="mb-4">
+  <h2 class="h4">Data Updates</h2>
+  <p>
+    Data is refreshed when the ETL pipeline runs and merges new state files into
+    <code>exclusion_main</code>. The web application reads live from the database —
+    no redeployment is needed after a data update.
+  </p>
+</section>
+{% endblock %}

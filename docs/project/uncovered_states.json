@@ -1,0 +1,58 @@
+{
+  "updated_at": "2026-07-07",
+  "policy": "Integrate only when official raw file exists in data/raw/ with a converter registered in the pipeline.",
+  "integrated_count": 39,
+  "integrated_includes_dc": true,
+  "federal_leie": "OIG via LEIE.csv",
+  "states": {
+    "MN": {
+      "status": "not_yet_sourced",
+      "note": "No raw file in data/raw/; research official Minnesota Medicaid exclusion list URL before scaffold."
+    },
+    "MO": {
+      "status": "not_yet_sourced",
+      "note": "Missouri — not in current pipeline."
+    },
+    "NV": {
+      "status": "not_yet_sourced",
+      "note": "Nevada — not in current pipeline."
+    },
+    "NH": {
+      "status": "not_yet_sourced",
+      "note": "New Hampshire — not in current pipeline."
+    },
+    "NM": {
+      "status": "no_public_list",
+      "note": "New Mexico — verify whether a downloadable public exclusion list exists."
+    },
+    "OK": {
+      "status": "no_public_list",
+      "note": "Oklahoma — verify official OIG/Medicaid sanction list format."
+    },
+    "OR": {
+      "status": "placeholder_only",
+      "note": "Oregon — placeholder in colleague notes; no canonical raw in repo."
+    },
+    "RI": {
+      "status": "not_yet_sourced",
+      "note": "Rhode Island — not in current pipeline."
+    },
+    "SD": {
+      "status": "not_yet_sourced",
+      "note": "South Dakota — not in current pipeline."
+    },
+    "UT": {
+      "status": "not_yet_sourced",
+      "note": "Utah — not in current pipeline."
+    },
+    "VA": {
+      "status": "not_yet_sourced",
+      "note": "Virginia — not in current pipeline."
+    },
+    "WI": {
+      "status": "not_yet_sourced",
+      "note": "Wisconsin — not in current pipeline."
+    }
+  },
+  "next_action": "When raw is obtained: python3 scripts/scaffold_state.py XX ... then follow IMPORT_RUNBOOK new-state checklist."
+}

@@ -1,0 +1,109 @@
+{
+  "status": "deployed_vesta_39_states_plus_leie",
+  "updated_at": "2026-07-07",
+  "local_states_integrated": [
+    "MD", "MA", "MI", "MS", "MT", "NE",
+    "CA", "NY", "NC", "ND", "OH", "NJ", "PA",
+    "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME",
+    "AL", "AK", "AZ", "AR", "CO", "CT", "DE", "DC", "FL",
+    "SC", "TN", "TX", "VT", "WA", "WV", "WY"
+  ],
+  "local_state_records": 173312,
+  "federal_leie_records": 83464,
+  "local_total_records": 256776,
+  "contributors": {
+    "xinzhuo_li": {
+      "contributor": "Xinzhuo Li",
+      "states": ["MD", "MA", "MI", "MS", "MT", "NE"],
+      "cleaned_records": 8575
+    },
+    "austin_7_states": {
+      "github": "https://github.com/AustinGH32/medicaid-medicare-provider-exclusion-search",
+      "contributor": "AustinGH32",
+      "states": ["CA", "NY", "NC", "ND", "OH", "NJ", "PA"],
+      "cleaned_records": 44997
+    },
+    "le_luo_10_states": {
+      "github": "https://github.com/le-luo327/Provider-Exclusion-List-Project",
+      "contributor": "le-luo327",
+      "states": ["GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME"],
+      "cleaned_records": 13917
+    },
+    "ameebeez_9_states": {
+      "github": "https://github.com/AmeeBeez/exclusion_list_project",
+      "contributor": "AmeeBeez",
+      "states": ["AL", "AK", "AZ", "AR", "CO", "CT", "DE", "DC", "FL"],
+      "cleaned_records": 90580,
+      "cleaned_by_state": {
+        "AL": 2086,
+        "AK": 301,
+        "AZ": 707,
+        "AR": 2208,
+        "CO": 316,
+        "CT": 89,
+        "DE": 1666,
+        "DC": 93,
+        "FL": 83114
+      },
+      "note": "CA skipped; raw-only ETL; sum verified against inventory 2026-07-07"
+    },
+    "frederic_7_states": {
+      "github": "https://github.com/FredericYan02/medicaid-provider-data-cleaning",
+      "contributor": "FredericYan02",
+      "states": ["SC", "TN", "TX", "VT", "WA", "WV", "WY"],
+      "cleaned_records": 15242
+    },
+    "le_luo_federal": {
+      "github": "https://github.com/le-luo327/Provider-Exclusion-List-Project",
+      "contributor": "le-luo327",
+      "source": "LEIE.csv",
+      "cleaned_records": 83464,
+      "list_source": "federal",
+      "source_state": "OIG",
+      "status": "deployed",
+      "raw_note": "External UPDATED.csv downloads → rename/copy to data/raw/LEIE.csv"
+    }
+  },
+  "validation": {
+    "pytest": "237 passed (2026-07-07, incl. merge_guard tests)",
+    "pipeline_full": "39 states + OIG PASS — import_local.sh 2026-07-07",
+    "inventory": "docs/artifacts/runs/20260707/inventory_20260707_150959.json — 173312/83464/256776",
+    "federal_validation": "OIG PASS",
+    "web_spotcheck": "docs/project/web_spotcheck_20260707.md — FL/TX/DC + LEIE PASS",
+    "vesta_audit": "docs/project/vesta_audit_20260707.json",
+    "vesta_deploy": "2026-07-07 — deploy_vesta.sh; 40 data sources refreshed",
+    "pipeline_incident": "docs/project/pipeline_incident_20260707_xlrd.md — xlrd resolved"
+  },
+  "collaboration": {
+    "tracker_ref": "docs/project/collaboration_tracker.md",
+    "ca_ownership": {
+      "status": "closed",
+      "current_owner": "AustinGH32",
+      "resolution": "Metadata only; no converter change unless raw format differs. AmeeBeez skips CA.",
+      "closed_at": "2026-07-07"
+    },
+    "contributor_readme_review": {
+      "status": "optional",
+      "note": "Non-blocking; contributors may verify sources/{id}/README.md when convenient"
+    }
+  },
+  "github_sync": {
+    "status": "committed_local_pending_push",
+    "target": "https://github.com/Xinzhuo-Li/medicaid-exclusion-list",
+    "branch": "main",
+    "committed_at": "2026-07-07",
+    "push_command": "git push -u origin main",
+    "note": "Run git log -1 after push to record commit SHA"
+  },
+  "next_steps": [
+    "Periodic refresh: pull_colleague_raw.sh → import_local.sh → deploy_vesta.sh",
+    "Phase 7 raw-driven: see docs/project/uncovered_states.json (12 states; integrate only when raw exists)",
+    "GitHub release: see docs/project/RELEASE_STATUS.md"
+  ],
+  "policy": [
+    "Merge by list_source + source_state (sql/03_merge_to_main.sql)",
+    "Federal LEIE merged via list_source=federal slice",
+    "Run pipeline validation before every sync to vesta",
+    "Integrate new states only when raw exists in data/raw/"
+  ]
+}

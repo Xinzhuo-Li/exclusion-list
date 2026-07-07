@@ -30,7 +30,7 @@ else
     --source=. \
     --remote=origin \
     --push \
-    --description "Six-state Medicaid exclusion list ETL (MD, MA, MI, MS, MT, NE) to PostgreSQL/OIG LEIE schema"
+    --description "39-state Medicaid exclusion list + federal LEIE ETL, PostgreSQL, Django web search"
 fi
 
 echo ""

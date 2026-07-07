@@ -10,10 +10,12 @@ from typing import Iterable
 
 import pandas as pd
 
-from src.config import CLEANED_DIR, DOCS_DIR, OIG_COLUMNS, PROCESSED_DIR
+from src.config import ARTIFACTS_DEDUP_DIR, CLEANED_DIR, OIG_COLUMNS, PROCESSED_DIR
 
 # Identity fields used to decide whether two records are true duplicates.
+# Name normalization rules: docs/NAME_HANDLING.md — use resolve_name_fields() in converters.
 DEDUP_IDENTITY_FIELDS = [
+    "list_source",
     "source_state",
     "lastname",
     "firstname",
@@ -91,8 +93,8 @@ def dedupe_records(
 
 
 def _write_dedup_log(state_code: str, dropped: list[dict[str, str]]) -> None:
-    DOCS_DIR.mkdir(parents=True, exist_ok=True)
-    log_path = DOCS_DIR / f"dedup_dropped_{state_code.lower()}.json"
+    ARTIFACTS_DEDUP_DIR.mkdir(parents=True, exist_ok=True)
+    log_path = ARTIFACTS_DEDUP_DIR / f"dedup_dropped_{state_code.lower()}.json"
     payload = {
         "state": state_code.upper(),
         "dropped_count": len(dropped),

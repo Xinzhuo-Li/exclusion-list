@@ -1,0 +1,79 @@
+{
+  "audited_at": "2026-07-07T15:10:00+08:00",
+  "host": "vesta (107.181.241.82)",
+  "data_source": "deploy_vesta.sh + ssh_psql + production_api",
+  "verdict": "clean",
+  "summary": "Federal LEIE re-merge: LEIE.csv \u2192 federal_oig.csv \u2192 exclusion_main; 39 state + OIG = 256776; staging delta 0",
+  "leie_refresh": {
+    "raw": "data/raw/LEIE.csv",
+    "md5": "b49f07c9a3181c2264f9fc85888e042f",
+    "cleaned_rows": 83464,
+    "note": "Root UPDATED.csv absent; canonical LEIE.csv already in place (identical content)"
+  },
+  "exclusion_list": {
+    "exclusion_main_rows": 256776,
+    "cleaned_staging_rows": 256776,
+    "sync_delta": 0,
+    "list_source": {
+      "state": 173312,
+      "federal": 83464
+    },
+    "state_source_count": 39,
+    "exact_duplicate_groups": 0,
+    "by_source_state": {
+      "AK": 301,
+      "AL": 2086,
+      "AR": 2208,
+      "AZ": 707,
+      "CA": 23094,
+      "CO": 316,
+      "CT": 89,
+      "DC": 93,
+      "DE": 1666,
+      "FL": 83114,
+      "GA": 1346,
+      "HI": 213,
+      "IA": 1271,
+      "ID": 171,
+      "IL": 3203,
+      "IN": 151,
+      "KS": 199,
+      "KY": 396,
+      "LA": 5859,
+      "MA": 294,
+      "MD": 1603,
+      "ME": 1108,
+      "MI": 4921,
+      "MS": 193,
+      "MT": 174,
+      "NC": 166,
+      "ND": 195,
+      "NE": 1390,
+      "NJ": 4021,
+      "NY": 8913,
+      "OH": 2017,
+      "OIG": 83464,
+      "PA": 6592,
+      "SC": 1329,
+      "TN": 21,
+      "TX": 13324,
+      "VT": 64,
+      "WA": 234,
+      "WV": 162,
+      "WY": 108
+    }
+  },
+  "local_inventory_ref": "docs/artifacts/runs/20260707/inventory_20260707_150959.json",
+  "validation_ref": "docs/artifacts/runs/20260707/validation_report_20260707_150937.json",
+  "web_spotcheck": {
+    "leie_busname": "MARKETING SERVICE \u2192 source_state=OIG, list_source=federal PASS",
+    "leie_npi": "1790782175 \u2192 OIG federal PASS"
+  },
+  "ssh_verification": {
+    "list_source_state": 173312,
+    "list_source_federal": 83464,
+    "total": 256776,
+    "oig_rows": 83464,
+    "staging_delta": 0
+  }
+}

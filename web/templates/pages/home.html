@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Home — Medicaid Exclusion List{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+  <div class="col-lg-8">
+    <h1 class="display-5 fw-bold">State Medicaid Exclusion List Search</h1>
+    <p class="lead text-muted">
+      A searchable database consolidating state Medicaid provider exclusion records
+      into a unified OIG-compatible format for the EMRTS initiative.
+    </p>
+  </div>
+  <div class="col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 card-title">Current Coverage</h2>
+        <p class="mb-1"><strong>{{ stats.total_records|default:0|floatformat:0 }}</strong> records</p>
+        <p class="mb-0 text-muted">{{ stats.source_count|default:0 }} data source(s)</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="mb-5">
+  <h2 class="h4">About This Project</h2>
+  <p>
+    The EMRTS Medicare/Medicaid Provider Exclusion Database initiative aims to make
+    it easier to verify whether a provider appears on a state Medicaid exclusion list.
+    This application reads from a PostgreSQL database populated by an ETL pipeline that
+    normalizes each state's raw files to the OIG LEIE 18-field schema.
+  </p>
+  <p>
+    New state data can be added through the ETL pipeline without changes to this web
+    application — sources are discovered dynamically from the database.
+  </p>
+</section>
+
+{% if stats.by_source_state %}
+<section class="mb-5">
+  <h2 class="h4">Data Sources</h2>
+  <div class="table-responsive">
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr>
+          <th>Source</th>
+          <th>State</th>
+          <th class="text-end">Records</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in stats.by_source_state %}
+        <tr>
+          <td>{{ row.name }}</td>
+          <td><code>{{ row.source_state }}</code></td>
+          <td class="text-end">{{ row.count|floatformat:0 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
+<div class="d-flex gap-2">
+  <a class="btn btn-primary btn-lg" href="{% url 'search' %}">Search Exclusion List</a>
+  <a class="btn btn-outline-secondary btn-lg" href="{% url 'usage' %}">How to Use</a>
+</div>
+{% endblock %}

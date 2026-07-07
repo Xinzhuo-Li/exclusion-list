@@ -23,12 +23,15 @@ CREATE TABLE exclusion_main (
     reindate VARCHAR(8) NOT NULL DEFAULT '',
     waiverdate VARCHAR(8) NOT NULL DEFAULT '',
     waiverstate VARCHAR(2) NOT NULL DEFAULT '',
-    source_state CHAR(2) NOT NULL,
+    list_source VARCHAR(10) NOT NULL DEFAULT 'state'
+        CHECK (list_source IN ('federal', 'state')),
+    source_state VARCHAR(10) NOT NULL,
     loaded_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_exclusion_main_npi ON exclusion_main (npi);
 CREATE INDEX idx_exclusion_main_source_state ON exclusion_main (source_state);
+CREATE INDEX idx_exclusion_main_list_source ON exclusion_main (list_source);
 CREATE INDEX idx_exclusion_main_excldate ON exclusion_main (excldate);
 
 -- Cleaned staging: must match exclusion_main column definitions (strict sync target).
@@ -54,8 +57,11 @@ CREATE TABLE cleaned_staging (
     reindate VARCHAR(8) NOT NULL DEFAULT '',
     waiverdate VARCHAR(8) NOT NULL DEFAULT '',
     waiverstate VARCHAR(2) NOT NULL DEFAULT '',
-    source_state CHAR(2) NOT NULL,
+    list_source VARCHAR(10) NOT NULL DEFAULT 'state'
+        CHECK (list_source IN ('federal', 'state')),
+    source_state VARCHAR(10) NOT NULL,
     loaded_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_cleaned_staging_source_state ON cleaned_staging (source_state);
+CREATE INDEX idx_cleaned_staging_list_source ON cleaned_staging (list_source);

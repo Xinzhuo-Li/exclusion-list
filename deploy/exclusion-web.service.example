@@ -1,0 +1,17 @@
+[Unit]
+Description=Medicaid Exclusion List Django Web Application
+After=network.target postgresql.service
+
+[Service]
+User=aiden
+Group=aiden
+WorkingDirectory=/home/aiden/exclusion-list/web
+EnvironmentFile=/home/aiden/exclusion-list/.env
+ExecStart=/home/aiden/exclusion-list/.venv/bin/gunicorn config.wsgi:application \
+    --bind 127.0.0.1:8000 \
+    --workers 2 \
+    --timeout 120
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

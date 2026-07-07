@@ -9,10 +9,9 @@ import pandas as pd
 from src.clean.common import (
     build_oig_record,
     is_empty_row,
-    is_organization,
     normalize_text,
     parse_city_state_zip,
-    truncate_field,
+    resolve_name_fields,
 )
 from src.config import RAW_DIR
 from src.convert.base import dedupe_records, save_cleaned, save_processed
@@ -61,32 +60,24 @@ def to_oig_records(df: pd.DataFrame) -> list[dict[str, str]]:
         if is_empty_row(row, ["last_name_org", "first_name", "npi"]):
             continue
 
-        last_name_org = normalize_text(row.get("last_name_org"))
-        first_name = normalize_text(row.get("first_name"))
-        entity_type = normalize_text(row.get("entity_type"))
-        city, state, zip_code = parse_city_state_zip(row.get("city_state_zip"))
+        names = resolve_name_fields(
+            last_name=row.get("last_name_org"),
+            first_name=row.get("first_name"),
+            provider_type=row.get("entity_type"),
+        )
+        if is_empty_row(names, ["lastname", "firstname", "busname"]):
+            continue
 
-        if is_organization(last_name_org, entity_type) or (
-            not first_name and entity_type.lower() == "business entity"
-        ):
-            lastname = ""
-            firstname = ""
-            midname = ""
-            busname = truncate_field("busname", last_name_org)
-        else:
-            lastname = truncate_field("lastname", last_name_org)
-            firstname = truncate_field("firstname", first_name)
-            midname = ""
-            busname = ""
+        city, state, zip_code = parse_city_state_zip(row.get("city_state_zip"))
 
         records.append(
             build_oig_record(
                 source_state=SOURCE_STATE,
-                lastname=lastname,
-                firstname=firstname,
-                midname=midname,
-                busname=busname,
-                general=entity_type,
+                lastname=names["lastname"],
+                firstname=names["firstname"],
+                midname=names["midname"],
+                busname=names["busname"],
+                general=row.get("entity_type"),
                 npi=row.get("npi"),
                 address=row.get("address"),
                 city=city,

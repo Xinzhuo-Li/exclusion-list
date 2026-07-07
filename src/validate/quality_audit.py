@@ -23,7 +23,7 @@ from src.clean.common import (
     parse_provider_name,
     truncate_field,
 )
-from src.config import CLEANED_DIR, DOCS_DIR, RAW_DIR
+from src.config import CLEANED_DIR, RAW_DIR, artifact_run_dir
 from src.convert.maryland import load_raw as load_md, to_oig_records as md_to_oig
 from src.convert.massachusetts import load_raw as load_ma, to_oig_records as ma_to_oig
 from src.convert.michigan import load_raw as load_mi, to_oig_records as mi_to_oig
@@ -209,17 +209,17 @@ def _format_checks(cleaned_rows: list[dict[str, str]], state: str) -> dict[str, 
         for r in cleaned_rows
         if not r.get("lastname") and not r.get("busname")
     ]
-    truncated_bus = [
-        r for r in cleaned_rows if r.get("busname") and len(r.get("busname", "")) == 30
+    long_busname = [
+        r for r in cleaned_rows if r.get("busname") and len(r.get("busname", "")) > 30
     ]
     return {
         "state": state.upper(),
         "invalid_npi_count": len(invalid_npi),
         "invalid_date_count": len(invalid_dates),
         "empty_name_count": len(empty_name),
-        "truncated_busname_count": len(truncated_bus),
+        "long_busname_count": len(long_busname),
         "empty_name_samples": empty_name[:3],
-        "truncated_busname_samples": [r.get("busname") for r in truncated_bus[:5]],
+        "long_busname_samples": [r.get("busname") for r in long_busname[:5]],
     }
 
 
@@ -251,17 +251,18 @@ def run() -> dict[str, Any]:
         "format_checks": format_checks,
         "spot_checks": _spot_check_samples(),
         "known_limitations": [
-            "OIG field length limits truncate long organization names (BUSNAME max 30).",
-            "MA long provider names and GENERAL values are truncated to OIG limits.",
-            "Deduplication removes rows with identical NPI + name + excldate within a state.",
+            "Name fields are preserved in full (TEXT); OIG max lengths are reference only.",
+            "Deduplication removes only exact duplicates (all identity fields identical).",
+            "Cross-state duplicate NPIs are retained as separate rows per business policy.",
+            "Empty EXCLDATE means long-term exclusion; no placeholder dates are inserted.",
             "MS rows with missing key fields are dropped during cleaning.",
             "NE PDF table extraction may include rows not present in a simple row count.",
             "Name parsing for individuals vs organizations is heuristic and may differ from source intent.",
         ],
     }
 
-    DOCS_DIR.mkdir(parents=True, exist_ok=True)
-    out = DOCS_DIR / f"quality_audit_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    run_dir = artifact_run_dir()
+    out = run_dir / f"quality_audit_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     with out.open("w", encoding="utf-8") as handle:
         json.dump(report, handle, indent=2, default=str)
 
@@ -282,7 +283,7 @@ def run() -> dict[str, Any]:
         print(
             f"{item['state']}: invalid_npi={item['invalid_npi_count']} "
             f"invalid_date={item['invalid_date_count']} empty_name={item['empty_name_count']} "
-            f"truncated_bus={item['truncated_busname_count']}"
+            f"long_busname={item['long_busname_count']}"
         )
     print(f"Report: {out}")
     return report

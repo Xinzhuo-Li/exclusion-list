@@ -1,0 +1,66 @@
+"""Convert and clean Arkansas exclusion list."""
+
+from __future__ import annotations
+
+import pandas as pd
+
+from src.clean.common import build_oig_record, is_empty_row, normalize_text, resolve_name_fields
+from src.config import RAW_DIR
+from src.convert.base import dedupe_records, save_cleaned, save_processed
+
+SOURCE_STATE = "AR"
+RAW_FILE = RAW_DIR / "Arkansas.csv"
+
+
+def load_raw() -> pd.DataFrame:
+    df = pd.read_csv(RAW_FILE, engine="python", on_bad_lines="skip").dropna(how="all")
+    return df.rename(
+        columns={
+            "Division": "division",
+            "Facility Name": "facility_name",
+            "Provider Name": "provider_name",
+            "City": "city",
+            "State": "state",
+            "Zip": "zip_code",
+        }
+    )
+
+
+def to_oig_records(df: pd.DataFrame) -> list[dict[str, str]]:
+    records: list[dict[str, str]] = []
+    for row in df.to_dict(orient="records"):
+        if is_empty_row(row, ["provider_name", "facility_name"]):
+            continue
+        names = resolve_name_fields(
+            provider_name=row.get("provider_name"),
+            business_name=row.get("facility_name"),
+        )
+        if is_empty_row(names, ["lastname", "firstname", "busname"]):
+            continue
+        records.append(
+            build_oig_record(
+                source_state=SOURCE_STATE,
+                lastname=names["lastname"],
+                firstname=names["firstname"],
+                midname=names["midname"],
+                busname=names["busname"],
+                general=normalize_text(row.get("division")),
+                city=row.get("city"),
+                state=row.get("state") or SOURCE_STATE,
+                zip_code=row.get("zip_code"),
+            )
+        )
+    return dedupe_records(records, state_code=SOURCE_STATE)
+
+
+def run() -> tuple[pd.DataFrame, list[dict[str, str]]]:
+    df = load_raw()
+    records = to_oig_records(df)
+    save_processed(df, SOURCE_STATE)
+    save_cleaned(records, SOURCE_STATE)
+    return df, records
+
+
+if __name__ == "__main__":
+    raw_df, cleaned = run()
+    print(f"Arkansas: {len(raw_df)} processed rows, {len(cleaned)} cleaned records")

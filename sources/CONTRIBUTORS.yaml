@@ -1,0 +1,161 @@
+# Single registry: contributor → states → canonical raw/converter paths.
+# Canonical production data lives in data/raw/ + src/convert/ only.
+# Colleague GitHub repos are reference/archive — see sources/README.md.
+
+updated_at: "2026-07-07"
+status: deployed_vesta_39_states_plus_leie
+local_state_records: 173312
+federal_leie_records: 83464
+local_total_records: 256776
+
+contributors:
+  - id: xinzhuo-li
+    name: Xinzhuo Li
+    github: https://github.com/Xinzhuo-Li/medicaid-exclusion-list
+    integrated_at: "2026-06"
+    cleaned_records: 8575
+    states: [MD, MA, MI, MS, MT, NE]
+    colleague_clone: null
+    raw_files:
+      MD: Maryland.xlsx
+      MA: Massachusetts.xlsx
+      MI: Michigan.xlsx
+      MS: Mississippi.xlsx
+      MT: Montana.xlsx
+      NE: Nebraska.pdf
+    converter_modules:
+      - maryland
+      - massachusetts
+      - michigan
+      - mississippi
+      - montana
+      - nebraska
+
+  - id: austin
+    name: AustinGH32
+    github: https://github.com/AustinGH32/medicaid-medicare-provider-exclusion-search
+    integrated_at: "2026-07"
+    cleaned_records: 44997
+    states: [CA, NY, NC, ND, OH, NJ, PA]
+    colleague_clone: medicaid-medicare-provider-exclusion-search
+    raw_files:
+      CA: California.csv
+      NY: NewYork.xlsx
+      NC: NorthCarolina.xlsx
+      ND: NorthDakota.xlsx
+      OH: Ohio.xlsx
+      NJ: NewJersey.csv
+      PA: Pennsylvania.csv
+    converter_modules:
+      - california
+      - new_york
+      - north_carolina
+      - north_dakota
+      - ohio
+      - new_jersey
+      - pennsylvania
+
+  - id: le-luo
+    name: le-luo327
+    github: https://github.com/le-luo327/Provider-Exclusion-List-Project
+    integrated_at: "2026-07"
+    cleaned_records: 13917
+    states: [GA, HI, ID, IL, IN, IA, KS, KY, LA, ME]
+    colleague_clone: Provider-Exclusion-List-Project
+    raw_files:
+      GA: Georgia.xlsx
+      HI: Hawaii.pdf
+      ID: Idaho.pdf
+      IL: Illinois.xlsx
+      IN: Indiana.xlsx
+      IA: Iowa.xlsx
+      KS: Kansas.xlsx
+      KY: Kentucky.xlsx
+      LA: Louisiana.xlsx
+      ME: Maine.pdf
+    converter_modules:
+      - georgia
+      - hawaii
+      - idaho
+      - illinois
+      - indiana
+      - iowa
+      - kansas
+      - kentucky
+      - louisiana
+      - maine
+
+  - id: ameebeez
+    name: AmeeBeez
+    github: https://github.com/AmeeBeez/exclusion_list_project
+    integrated_at: "2026-07"
+    cleaned_records: 90580
+    cleaned_by_state:
+      AL: 2086
+      AK: 301
+      AZ: 707
+      AR: 2208
+      CO: 316
+      CT: 89
+      DE: 1666
+      DC: 93
+      FL: 83114
+    note: CA skipped; raw-only ETL into canonical pipeline
+    states: [AL, AK, AZ, AR, CO, CT, DE, DC, FL]
+    colleague_clone: exclusion_list_project
+    raw_files:
+      AL: Alabama.xlsx
+      AK: Alaska.csv
+      AZ: Arizona.xlsx
+      AR: Arkansas.csv
+      CO: Colorado.xlsx
+      CT: Connecticut.xlsx
+      DE: Delaware.csv
+      DC: DistrictOfColumbia.csv
+      FL: Florida.csv
+    converter_modules:
+      - alabama
+      - alaska
+      - arizona
+      - arkansas
+      - colorado
+      - connecticut
+      - delaware
+      - district_of_columbia
+      - florida
+
+  - id: frederic
+    name: FredericYan02
+    github: https://github.com/FredericYan02/medicaid-provider-data-cleaning
+    integrated_at: "2026-07"
+    cleaned_records: 15242
+    states: [SC, TN, TX, VT, WA, WV, WY]
+    colleague_clone: medicaid-provider-data-cleaning
+    raw_files:
+      SC: SouthCarolina.xlsx
+      TN: Tennessee.xlsx
+      TX: Texas.xls
+      VT: Vermont.xlsx
+      WA: Washington.xlsx
+      WV: WestVirginia.csv
+      WY: Wyoming.pdf
+    converter_modules:
+      - south_carolina
+      - tennessee
+      - texas
+      - vermont
+      - washington
+      - west_virginia
+      - wyoming
+
+  - id: le-luo-federal
+    name: le-luo327
+    github: https://github.com/le-luo327/Provider-Exclusion-List-Project
+    integrated_at: "2026-07"
+    cleaned_records: 83464
+    list_source: federal
+    source_state: OIG
+    raw_files:
+      OIG: LEIE.csv
+    converter_modules:
+      - federal_leie

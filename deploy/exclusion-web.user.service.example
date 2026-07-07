@@ -1,0 +1,12 @@
+[Unit]
+Description=Medicaid Exclusion List Django Web Application
+After=network.target
+
+[Service]
+WorkingDirectory=/home/aiden/exclusion-list/web
+EnvironmentFile=/home/aiden/exclusion-list/.env
+ExecStart=/home/aiden/exclusion-list/.venv/bin/gunicorn config.wsgi:application --bind 0.0.0.0:8004 --workers 2 --timeout 120
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

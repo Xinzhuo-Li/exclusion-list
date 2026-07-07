@@ -1,5 +1,6 @@
 -- Verify exclusion_main strictly matches cleaned_staging (business columns only).
 -- Run after merge. staging_minus_main and main_minus_staging should both be 0.
+-- Sync compares 20 business columns only (not id, loaded_at). See docs/guides/MERGE_SEMANTICS.md
 
 \echo '=== Row counts ==='
 SELECT 'cleaned_staging' AS tbl, COUNT(*) FROM cleaned_staging
@@ -13,12 +14,12 @@ SELECT source_state, COUNT(*) AS main_cnt FROM exclusion_main GROUP BY source_st
 SELECT COUNT(*) AS staging_minus_main FROM (
     SELECT lastname, firstname, midname, busname, general, specialty,
            upin, npi, dob, address, city, state, zip_code,
-           excltype, excldate, reindate, waiverdate, waiverstate, source_state
+           excltype, excldate, reindate, waiverdate, waiverstate, list_source, source_state
     FROM cleaned_staging
     EXCEPT
     SELECT lastname, firstname, midname, busname, general, specialty,
            upin, npi, dob, address, city, state, zip_code,
-           excltype, excldate, reindate, waiverdate, waiverstate, source_state
+           excltype, excldate, reindate, waiverdate, waiverstate, list_source, source_state
     FROM exclusion_main
 ) diff;
 
@@ -26,12 +27,12 @@ SELECT COUNT(*) AS staging_minus_main FROM (
 SELECT COUNT(*) AS main_minus_staging FROM (
     SELECT lastname, firstname, midname, busname, general, specialty,
            upin, npi, dob, address, city, state, zip_code,
-           excltype, excldate, reindate, waiverdate, waiverstate, source_state
+           excltype, excldate, reindate, waiverdate, waiverstate, list_source, source_state
     FROM exclusion_main
     EXCEPT
     SELECT lastname, firstname, midname, busname, general, specialty,
            upin, npi, dob, address, city, state, zip_code,
-           excltype, excldate, reindate, waiverdate, waiverstate, source_state
+           excltype, excldate, reindate, waiverdate, waiverstate, list_source, source_state
     FROM cleaned_staging
 ) diff;
 

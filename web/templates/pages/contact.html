@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Contact — Medicaid Exclusion List{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Contact</h1>
+
+<p>
+  For questions about the exclusion list data, search functionality, or API access,
+  please contact the EMRTS project team.
+</p>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h2 class="h5 card-title">Project Team</h2>
+    <ul class="mb-0">
+      <li><strong>EMRTS Initiative</strong> — Medicaid/Medicare Provider Exclusion Database</li>
+      <li><strong>Data pipeline</strong> — maintained in this repository (<code>src/pipeline.py</code>)</li>
+      <li><strong>Web application</strong> — Django search UI and REST API (<code>web/</code>)</li>
+    </ul>
+  </div>
+</div>
+
+<p class="mt-4 text-muted">
+  To report data quality issues for a specific state, include the source state code,
+  NPI (if available), and the record details from your search results.
+</p>
+{% endblock %}

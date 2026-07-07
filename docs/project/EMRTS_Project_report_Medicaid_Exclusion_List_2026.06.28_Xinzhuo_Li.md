@@ -1,0 +1,234 @@
+**Contact Info:**
+**Name:** Xinzhuo Li / Aiden Li
+**Mobile:** +1 206-670-8703
+**Email:** aiden020725@gmail.com
+**Telegram:** @aiden020725
+**GitHub:** https://github.com/Xinzhuo-Li
+
+**File Name:** EMRTS_Project_report_Medicaid_Exclusion_List_2026.06.28_Xinzhuo_Li.pdf
+**Date:** 06/15 - 06/28
+
+# Project Report
+
+**Project:** Six-State Medicaid Provider Exclusion List ETL
+**Project Period:** 06/15 - 06/28
+**GitHub Repository:** https://github.com/Xinzhuo-Li/medicaid-exclusion-list
+
+## Subject of This Project
+
+Six-State Medicaid Exclusion List Merge — ETL Pipeline, PostgreSQL Deployment, Data Quality Validation, and GitHub Documentation
+
+- Built an end-to-end ETL pipeline to merge six assigned state Medicaid exclusion lists (MD, MA, MI, MS, MT, NE) into a unified OIG LEIE-compatible schema.
+- Converted source Excel and PDF files into standardized cleaned CSV outputs and loaded them into PostgreSQL on the vesta server.
+- Deployed 8,575 cleaned exclusion records to PostgreSQL tables: six stage tables, cleaned_staging, and exclusion_main.
+- Resolved state-specific data mapping issues including Michigan dual sanction dates, Mississippi indefinite REINDATE values, Maryland legend rows, and Montana alias names.
+- Documented leadership decisions on full-name retention, empty EXCLDATE handling, cross-state NPI retention, and strict main/staging sync.
+- Added automated regression tests (55 pytest cases), pipeline quality audit, run manifest tracking, and GitHub onboarding documentation.
+- Published the project to GitHub with README, WORKFLOW runbook, and reproducible source files for team use.
+
+## Notes
+
+## 1. Project Purpose and Scope
+
+
+The project supports the EMRTS Medicare/Medicaid Provider Exclusion Database initiative by consolidating state Medicaid exclusion lists into one searchable PostgreSQL database.
+
+Assigned scope covers six states: Maryland (MD), Massachusetts (MA), Michigan (MI), Mississippi (MS), Montana (MT), and Nebraska (NE).
+
+Each state's raw data format differs (Excel vs PDF, different column names and business rules), so per-state converters were required before merging into a common schema.
+
+The target schema follows the OIG LEIE reference (18 fields plus source_state), enabling consistent provider screening by name, NPI, business name, state, and exclusion date.
+
+Final deliverable: 8,575 cleaned records loaded and merged into exclusion_main, with full audit trail and documented business decisions.
+
+
+
+## 2. Technologies and Tools Used
+
+
+Python 3.12 — core ETL language with modular per-state converters and shared cleaning utilities.
+
+pandas / openpyxl — Excel source file parsing for five states.
+
+pdfplumber — Nebraska PDF table extraction (no OCR required).
+
+PostgreSQL — production database on vesta (port 5433); stage tables, cleaned_staging, and exclusion_main.
+
+psycopg2 — Python PostgreSQL loader; SQL scripts for schema, merge (DELETE + INSERT), and sync verification.
+
+pytest — 55 automated regression tests for dates, NPI, names, dedup, Michigan multi-date, and MS REINDATE logic.
+
+Git / GitHub — version control and public repository: https://github.com/Xinzhuo-Li/medicaid-exclusion-list
+
+Linux server (vesta) — remote deployment via rsync/SSH; PostgreSQL setup and merge scripts.
+
+Documentation — README.md, docs/WORKFLOW.md, docs/DATA_INVENTORY.md, docs/STATE_MAPPING.md, docs/ISSUES_AND_DECISIONS_BILINGUAL.md.
+
+
+
+## 3. Pipeline Architecture (Steps 0–5)
+
+
+Step 0 — Run manifest: records SHA256 hashes of raw source files for auditability (docs/run_manifest_*.json).
+
+Step 1 — Convert & clean: per-state modules read data/raw/ xlsx/pdf and write data/processed/*_raw.csv and data/cleaned/*_oig.csv.
+
+Step 2 — Import validation: check row counts, NPI/date rates, and field lengths against baselines; fail-fast on drift.
+
+Step 3 — Quality audit: rerun converters and compare to saved CSVs for rerun consistency; fail-fast on mismatch.
+
+Step 4 — Load PostgreSQL: apply schema, truncate and reload stage tables and cleaned_staging.
+
+Step 5 — Merge & verify: DELETE six-state rows from exclusion_main, INSERT from cleaned_staging, assert strict EXCEPT sync.
+
+Orchestrator: python3 -m src.pipeline (flags: --skip-nebraska, --skip-db, --skip-merge).
+
+
+
+## 4. Data Processing Results by State
+
+
+MD: 1,605 source rows → 1,603 cleaned (6 legend rows filtered, 2 exact duplicates removed).
+
+MA: 294 → 294 (no address in source Excel).
+
+MI: 3,982 → 4,921 (multi-date expansion — each sanction date becomes a separate record).
+
+MS: 194 → 193 (1 empty row skipped; indefinite REINDATE cleared for 192 records).
+
+MT: 174 → 174 (a.k.a. alias names parsed; 6 records missing EXCLDATE in source).
+
+NE: 1,391 → 1,390 (PDF extraction; 82% missing NPI; no address column in source).
+
+Total: 7,640 source rows → 8,575 cleaned records in exclusion_main.
+
+
+
+## 5. Issues Resolved During Development
+
+
+Michigan dual sanction dates: previously mapped incorrectly; fixed so each parsed date generates a separate record with its own EXCLDATE and EXCLTYPE.
+
+Mississippi indefinite REINDATE: Excel serial 401768 and 'Indefinite' exclusion period now map to empty REINDATE instead of a placeholder date.
+
+Maryland legend rows: filtered metadata rows that were not provider records.
+
+Montana alias names: parsed 'a.k.a.' prefix names into last/first/middle fields.
+
+Deduplication: exact-duplicate removal using 16 identity fields; avoids collapsing different individuals with similar names.
+
+EXCLTYPE normalization: state-specific sanction codes mapped to standardized values where applicable.
+
+
+
+## 6. Leadership Decisions (Confirmed 2026-06-20)
+
+
+Decision 1 — Retain full name length: name fields use PostgreSQL TEXT; no OIG fixed-length truncation (272 records with busname > 30 chars preserved).
+
+Decision 2 — Empty EXCLDATE = long-term exclusion: 8 records (MT 6 + MS 2) kept with empty excldate; no placeholder dates inserted.
+
+Decision 3 — Cross-state duplicate NPI: 15 NPIs appearing in multiple states retained as separate rows with source_state for audit.
+
+Decision 4 — Strict sync: exclusion_main must exactly match cleaned_staging after merge; verified by sql/04_verify_main_sync.sql and Python assert.
+
+
+
+## 7. Known Source Data Limitations
+
+
+Nebraska: 82% missing NPI and 100% missing address — limitations of the PDF table structure, not conversion errors.
+
+Massachusetts: 100% missing address — source Excel has no address column.
+
+NPI coverage varies by state: MA ~81%, MS ~75%, MI ~29%, MT ~25%, NE ~20%, MD ~17%.
+
+Claims matching for NE and MA will rely primarily on provider name where NPI or address is unavailable.
+
+These limitations are documented in docs/ISSUES_AND_DECISIONS_BILINGUAL.md and docs/DATA_INVENTORY.md.
+
+
+
+## 8. Data Quality and Regression Safety Improvements
+
+
+Added 55 pytest cases covering core transforms, dedup logic, and record-count regression against baselines.
+
+Integrated quality_audit into the main pipeline with fail-fast on rerun inconsistency.
+
+Tightened validation thresholds from loose minimums to expected counts ±5 per state.
+
+Added verify_main_sync Python assertion — pipeline exits with error if exclusion_main differs from cleaned_staging.
+
+Run manifest tracks source file SHA256 on each pipeline run for reproducibility and audit.
+
+
+
+## 9. GitHub Documentation and Reproducibility
+
+
+Repository: https://github.com/Xinzhuo-Li/medicaid-exclusion-list
+
+README.md — clone-to-run quick start (Path A full ETL, Path B CSV-only), pipeline overview, troubleshooting.
+
+docs/WORKFLOW.md — detailed operator runbook with per-step manual commands and JSON report interpretation.
+
+data/raw/README.md — exact source filenames and update instructions.
+
+All seven source files (6 xlsx + 1 pdf) included in the repo so new users can reproduce the full pipeline after clone.
+
+Pre-generated processed/cleaned CSVs included for validation and testing without re-converting.
+
+
+
+## 10. Lessons Learned
+
+
+State exclusion lists are not uniform — each state requires its own converter with documented mapping rules before any merge is possible.
+
+Real ETL work goes beyond loading data: validation, dedup policy, business-rule decisions, and audit trails are essential for healthcare compliance use cases.
+
+Leadership decisions on edge cases (empty dates, long names, cross-state NPIs) must be documented explicitly to avoid silent data loss.
+
+Automated tests and rerun consistency checks catch regressions early when shared cleaning logic is changed.
+
+Staging tables plus a strict merge pattern (DELETE scoped by state, INSERT from staging, EXCEPT verify) keeps exclusion_main trustworthy.
+
+Clear GitHub documentation reduces onboarding time and helps the team continue development without depending on one person's local setup.
+
+Database design and search requirements (NPI vs name search, source labeling, full business names) must be considered during ETL, not only in the UI.
+
+
+
+## 11. Main Takeaways
+
+
+Successfully delivered a production-ready six-state Medicaid exclusion list ETL with 8,575 records in PostgreSQL and full documentation on GitHub.
+
+The project demonstrates the full data engineering workflow: ingest heterogeneous sources, normalize to a standard schema, validate quality, load to database, merge with audit, and document for the team.
+
+Leadership-confirmed business rules are encoded in code, SQL, and bilingual decision documents — the system is ready for integration with the Django search application.
+
+The foundation is in place to add more states, connect to the search UI, and continue data quality monitoring as source files are updated.
+
+
+## Deliverables
+
+- GitHub repository: https://github.com/Xinzhuo-Li/medicaid-exclusion-list
+- PostgreSQL: 8,575 rows in exclusion_main on vesta (port 5433)
+- Documentation: README.md, WORKFLOW.md, DATA_INVENTORY.md, STATE_MAPPING.md, ISSUES_AND_DECISIONS_BILINGUAL.md
+- Automated tests: 55 pytest cases in tests/
+- Audit artifacts: validation reports, quality audit reports, dedup logs, run manifests in docs/
+
+## Future Improvements
+
+- Add more states to the ETL pipeline using the established per-state converter pattern.
+- Add GitHub Actions CI to run pytest and pipeline --skip-db on each push.
+- Integrate exclusion_main with the Django search application (name, NPI, business name, state, source, exclusion date filters).
+- Monitor source file updates via run manifest SHA256 diffs and refresh baselines when counts change intentionally.
+- Consider Git LFS if future source files exceed GitHub size limits.
+- Add Nebraska PDF regression fixture tests if PDF layout changes become a recurring risk.
+- Extend deploy scripts for non-Mac environments (remove osascript/expect dependency where possible).
+- Continue separating Medicare (federal/OIG) and Medicaid (state) source labels in the unified database as additional sources are added.
+
+**Hours Worked:** 80
