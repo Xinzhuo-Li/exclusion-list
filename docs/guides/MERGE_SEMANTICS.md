@@ -60,8 +60,8 @@ bash scripts/import_local.sh
 bash scripts/check_postgres.sh
 bash scripts/import_with_db.sh
 
-# Production
-bash scripts/deploy_vesta.sh
+# Production (configure deploy/config.sh first)
+bash deploy/sync_and_merge_noninteractive.sh
 ```
 
 ## Dev-only partial load

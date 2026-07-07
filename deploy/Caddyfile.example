@@ -1,10 +1,10 @@
-# Caddy reverse proxy for Medicaid Exclusion List (vesta uses Caddy, not nginx).
-# Install on server: copy to /etc/caddy/Caddyfile or include as a site block.
+# Caddy reverse proxy for Medicaid Exclusion List web app.
+# Copy to /etc/caddy/Caddyfile or include as a site block.
 
-107.181.241.82 {
-    reverse_proxy 127.0.0.1:8004
+your.server.example {
+    reverse_proxy 127.0.0.1:8000
     handle_path /static/* {
-        root * /home/aiden/exclusion-list/web/staticfiles
+        root * /home/USER/exclusion-list/web/staticfiles
         file_server
     }
 }

@@ -1,19 +1,67 @@
+# --- Secrets & local env ---
 .env
 .venv/
+deploy/config.sh
+
+# --- IDE / debug ---
+.cursor/
+*.log
+
+# --- Python / OS ---
 __pycache__/
 .pytest_cache/
 *.pyc
 .DS_Store
 ~$*.xlsx
-deploy/config.sh
-# Colleague clones live outside repo — see sources/README.md
+
+# --- Colleague clones (outside repo) ---
 colleague-repos/
 ../colleague-repos/
-# Pipeline artifacts (regenerable; keep latest via symlink)
-docs/artifacts/runs/*/
-!docs/artifacts/latest
-docs/artifacts/dedup/
-*.docx
-.cursor/
+
+# --- Generated data (regenerable via pipeline) ---
+data/processed/
+data/cleaned/
+
+# --- Pipeline run artifacts (regenerable) ---
+docs/artifacts/
+
+# --- Internal project ops (vesta audits, course reports, collab tracking) ---
+docs/project/*
+!docs/project/uncovered_states.json
+docs/scans/
+
+# --- Duplicate / course docs at docs/ root (canonical copies live in docs/guides/) ---
+docs/*.docx
+docs/*.pdf
+
+# --- Internal reference (not official state source data) ---
+data/raw/数据结构.pdf
+
+# --- Contributor repo scan output ---
+sources/**/scan.json
+
+# --- Deprecated / vesta-specific deploy & ops scripts ---
+deploy.sh
+deploy/audit_vesta.sh
+deploy/upload_with_password.sh
+deploy/upload_from_mac.sh
+deploy/pgadmin_tunnel.sh
+deploy/ssh_interactive.sh
+deploy/ssh_run.sh
+deploy/reload_stage_schema.sh
+deploy/run_merge_and_check.sh
+deploy/run_verify_remote.sh
+deploy/sync_and_merge.sh
+deploy/deploy_web_production.sh
+deploy/run_full_deploy.sh
+deploy/find_exclusion_dbs.sh
+scripts/deploy_vesta.sh
+scripts/pull_colleague_raw.sh
+scripts/integrate_colleague_repo.sh
+scripts/merge_colleague_state.sh
+scripts/github_push.sh
+
+# --- Web build output ---
 web/staticfiles/
 *.sqlite3
+*.docx

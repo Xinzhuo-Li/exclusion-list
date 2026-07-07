@@ -67,8 +67,8 @@ except Exception as exc:
         print(
             f"ERROR: Cannot connect to PostgreSQL at {host}:{port}/{dbname} as {user}\\n"
             f"  {exc}\\n"
-            "  For local merge testing: start PG or use SSH tunnel (see deploy/pgadmin_tunnel.sh).\\n"
-            "  For production merge validation: bash scripts/deploy_vesta.sh",
+            "  For local merge testing: start PG or configure SSH tunnel in deploy/config.sh.\\n"
+            "  For production merge: bash deploy/sync_and_merge_noninteractive.sh",
             file=sys.stderr,
         )
     sys.exit(1)

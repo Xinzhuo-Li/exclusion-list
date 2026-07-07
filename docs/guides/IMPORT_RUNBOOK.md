@@ -14,7 +14,7 @@ Detailed ETL steps: [WORKFLOW.md](WORKFLOW.md). Name rules: [NAME_HANDLING.md](N
 | Grand total | **256,776** | |
 | `list_source` | `state` | `federal` |
 
-Name audit: flagged rows for spot-check (`docs/artifacts/latest/name_audit_*.json`) — non-blocking.
+Name audit: flagged rows for spot-check (`docs/artifacts/runs/YYYYMMDD/name_audit_*.json`) — non-blocking.
 
 Contributor registry: [sources/CONTRIBUTORS.yaml](../../sources/CONTRIBUTORS.yaml)
 
@@ -46,21 +46,18 @@ python3 scripts/inventory_data.py
 
 Expected inventory: `local_state_total=173312`, `local_federal_total=83464`, `local_grand_total=256776`.
 
-### Deploy vesta (after local PASS)
+### Remote deploy (after local PASS)
 
 ```bash
-bash scripts/deploy_vesta.sh
-# same as: bash deploy/sync_and_merge_noninteractive.sh
+cp deploy/config.example.sh deploy/config.sh   # edit host/credentials
+bash deploy/sync_and_merge_noninteractive.sh
 ```
 
 **Do not deploy** if validation_report shows any FAIL state.
 
-### Clone colleague repo + copy raw files
+### Integrate colleague raw files
 
-```bash
-bash scripts/merge_colleague_state.sh https://github.com/user/repo.git TX FL
-bash scripts/pull_colleague_raw.sh          # pull all 4 clones; diff summary only
-```
+Copy official raw files from contributor repos into `data/raw/` manually (see [sources/README.md](../../sources/README.md) and [data/raw/README.md](../../data/raw/README.md)).
 
 ---
 
@@ -68,19 +65,19 @@ bash scripts/pull_colleague_raw.sh          # pull all 4 clones; diff summary on
 
 When a state publishes an updated exclusion list:
 
-1. **Fetch upstream** — `bash scripts/pull_colleague_raw.sh` (or download from state website)
+1. **Fetch upstream** — download from state website or contributor repo
 2. **Copy raw** — place file in `data/raw/` with **exact filename** from [data/raw/README.md](../../data/raw/README.md); never overwrite without noting SHA256 change
 3. **Validate locally** — `bash scripts/import_local.sh`
-4. **Review artifacts** (non-blocking name audit; blocking validation):
-   - `docs/artifacts/latest/validation_report_*.json` — all states PASS
-   - `docs/artifacts/latest/name_audit_*.json` — spot-check flagged names
-   - `docs/artifacts/latest/run_manifest_*.json` — raw file fingerprints
-5. **Deploy** (if validation PASS) — `bash scripts/deploy_vesta.sh`
-6. **Refresh web metadata** on vesta:
+4. **Review artifacts** (non-blocking name audit; blocking validation) under local `docs/artifacts/runs/YYYYMMDD/`:
+   - `validation_report_*.json` — all states PASS
+   - `name_audit_*.json` — spot-check flagged names
+   - `run_manifest_*.json` — raw file fingerprints
+5. **Deploy** (if validation PASS) — `bash deploy/sync_and_merge_noninteractive.sh`
+6. **Refresh web metadata** on the server:
    ```bash
    cd web && python manage.py refresh_sources
    ```
-7. **Web spot-check** — search 2–3 updated states at http://107.181.241.82:8004/search/
+7. **Web spot-check** — search 2–3 updated states on your deployment URL
 
 See also [PROJECT_LAYOUT.md](PROJECT_LAYOUT.md) for canonical vs archive paths.
 
@@ -107,7 +104,7 @@ See also [PROJECT_LAYOUT.md](PROJECT_LAYOUT.md) for canonical vs archive paths.
    - `sources/CONTRIBUTORS.yaml`
 5. **Document** → `docs/guides/FIELD_SEMANTICS.md`, `STATE_MAPPING.md`, `DATA_INVENTORY.md`
 6. **Validate** → `bash scripts/import_local.sh --states-only`
-7. **Deploy** → `bash scripts/deploy_vesta.sh`
+7. **Deploy** → `bash deploy/sync_and_merge_noninteractive.sh`
 
 ---
 
@@ -155,13 +152,12 @@ Flags: `--skip-db`, `--states-only`, `--skip-nebraska`, `--skip-merge`
 | Script | Purpose |
 |--------|---------|
 | `scripts/import_local.sh` | **Main** local validate entry |
-| `scripts/deploy_vesta.sh` | Deploy to production server |
-| `scripts/pull_colleague_raw.sh` | Pull 4 colleague clones (no auto-copy to data/raw) |
+| `scripts/import_with_db.sh` | Local load + merge (requires PostgreSQL) |
+| `scripts/check_postgres.sh` | Preflight DB connectivity |
 | `scripts/scaffold_state.py` | New `src/convert/{state}.py` template |
-| `scripts/inventory_data.py` | Row counts → `docs/artifacts/runs/YYYYMMDD/inventory_*.json` |
-| `scripts/merge_colleague_state.sh` | Clone + integrate colleague repo |
+| `scripts/inventory_data.py` | Row counts → local `docs/artifacts/runs/YYYYMMDD/inventory_*.json` |
 | `src/pipeline.py` | Full ETL orchestrator |
-| `deploy/audit_vesta.sh` | Remote DB audit (39 states + LEIE) |
+| `deploy/sync_and_merge_noninteractive.sh` | Remote rsync + DB merge |
 | `deploy/sync_and_merge_noninteractive.sh` | Rsync + DB reload + merge |
 
 ---
@@ -170,11 +166,11 @@ Flags: `--skip-db`, `--states-only`, `--skip-nebraska`, `--skip-merge`
 
 | File | Purpose |
 |------|---------|
-| `docs/artifacts/latest/validation_report_*.json` | Row counts PASS/FAIL |
-| `docs/artifacts/latest/name_audit_*.json` | Name fields to spot-check |
+| `docs/artifacts/runs/YYYYMMDD/validation_report_*.json` | Row counts PASS/FAIL |
+| `docs/artifacts/runs/YYYYMMDD/name_audit_*.json` | Name fields to spot-check |
 | `docs/artifacts/dedup/dedup_dropped_{state}.json` | Exact duplicates removed |
-| `docs/artifacts/latest/run_manifest_*.json` | Raw file fingerprints |
-| `docs/artifacts/latest/inventory_*.json` | Per-state row summary |
+| `docs/artifacts/runs/YYYYMMDD/run_manifest_*.json` | Raw file fingerprints |
+| `docs/artifacts/runs/YYYYMMDD/inventory_*.json` | Per-state row summary |
 
 ---
 
@@ -182,10 +178,10 @@ Flags: `--skip-db`, `--states-only`, `--skip-nebraska`, `--skip-merge`
 
 | Problem | What to do |
 |---------|------------|
-| Texas convert fails (`xlrd`) | `pip install -r requirements.txt`; see [pipeline_incident_20260707_xlrd.md](../project/pipeline_incident_20260707_xlrd.md) |
+| Texas convert fails (`xlrd`) | `pip install -r requirements.txt` |
 | PDF state fails | Install `pdfplumber`; verify NE/HI/ID/ME/WY raw files exist |
-| validation FAIL | Read `docs/artifacts/latest/validation_report_*.json` for failing state |
-| vesta count mismatch | Run `deploy/audit_vesta.sh`; compare with `docs/project/vesta_audit_YYYYMMDD.json` |
+| validation FAIL | Read local `docs/artifacts/runs/YYYYMMDD/validation_report_*.json` for failing state |
+| Remote count mismatch | Re-run `bash deploy/sync_and_merge_noninteractive.sh` after local PASS |
 | Local DB merge untested | `bash scripts/check_postgres.sh` then `bash scripts/import_with_db.sh` |
 
 ## Danger — partial load + merge

@@ -98,7 +98,7 @@ Audit is **non-blocking**; fix rules in `common.py` and re-run convert.
 2. Call `resolve_name_fields()` with the correct flags.
 3. `build_oig_record(..., **names)`.
 4. `dedupe_records()` from `src/convert/base.py`.
-5. Run `python3 -m src.pipeline --skip-db` and review `docs/artifacts/latest/name_audit_*.json`.
+5. Run `python3 -m src.pipeline --skip-db` and review `docs/artifacts/runs/YYYYMMDD/name_audit_*.json`.
 
 ## Examples
 

@@ -2,7 +2,7 @@
 
 ETL pipeline merging **39 state** Medicaid exclusion lists and **HHS OIG LEIE** into PostgreSQL using the OIG LEIE schema. Includes Django web search (`web/`).
 
-**Repository:** https://github.com/Xinzhuo-Li/medicaid-exclusion-list
+**Repository:** https://github.com/Xinzhuo-Li/exclusion-list
 
 **Requirements:** Python 3.10+, pip. PostgreSQL 12+ optional (database load/merge only).
 
@@ -13,8 +13,8 @@ ETL pipeline merging **39 state** Medicaid exclusion lists and **HHS OIG LEIE** 
 ## Quick Start
 
 ```bash
-git clone https://github.com/Xinzhuo-Li/medicaid-exclusion-list.git
-cd medicaid-exclusion-list
+git clone https://github.com/Xinzhuo-Li/exclusion-list.git
+cd exclusion-list
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env          # edit PostgreSQL credentials
@@ -28,19 +28,17 @@ python3 -m src.pipeline             # full ETL + PostgreSQL
 ## Project Structure
 
 ```
-medicaid-exclusion-list/
+exclusion-list/
 ├── data/
-│   ├── raw/              # 42 source files — see data/raw/README.md
-│   ├── processed/        # State-native CSV (*_raw.csv)
-│   └── cleaned/          # OIG-mapped CSV (*_oig.csv) + federal_oig.csv
+│   ├── raw/              # 41 official source files — see data/raw/README.md
+│   ├── processed/        # Generated locally (*_raw.csv) — gitignored
+│   └── cleaned/          # Generated locally (*_oig.csv) — gitignored
 ├── sources/
-│   ├── CONTRIBUTORS.yaml # Single contributor → state registry
+│   ├── CONTRIBUTORS.yaml # Contributor → state registry
 │   └── */README.md       # Per-contributor notes
 ├── docs/
 │   ├── guides/           # Runbooks (WORKFLOW, STATE_MAPPING, …)
-│   ├── project/          # Deploy status, audits
-│   ├── artifacts/        # Pipeline JSON outputs
-│   └── scans/            # Colleague repo scans
+│   └── project/          # uncovered_states.json (12 states not yet integrated)
 ├── sql/                  # Stage tables, merge, verify
 ├── src/
 │   ├── convert/          # 39 state + federal_leie converters
@@ -48,7 +46,7 @@ medicaid-exclusion-list/
 │   └── pipeline.py       # End-to-end orchestrator
 ├── web/                  # Django search UI + API
 ├── tests/
-├── deploy/               # Remote vesta sync scripts
+├── deploy/               # Remote sync examples + merge scripts
 └── requirements.txt
 ```
 
@@ -125,7 +123,7 @@ cp .env.example .env
 python3 -m pytest tests/ -v
 ```
 
-198 tests cover transforms, deduplication, and record-count regression against [docs/guides/DATA_INVENTORY.md](docs/guides/DATA_INVENTORY.md).
+240+ tests cover transforms, deduplication, and record-count regression against [docs/guides/DATA_INVENTORY.md](docs/guides/DATA_INVENTORY.md).
 
 Local validation shortcut:
 
@@ -137,28 +135,21 @@ bash scripts/import_local.sh --states-only
 
 ## Output Artifacts
 
-| Artifact | Location |
-|----------|----------|
-| Latest run | `docs/artifacts/latest/` (symlink) |
-| Run manifest | `docs/artifacts/runs/YYYYMMDD/run_manifest_*.json` |
-| Validation report | `docs/artifacts/runs/YYYYMMDD/validation_report_*.json` |
-| Quality audit | `docs/artifacts/runs/YYYYMMDD/quality_audit_*.json` |
+Pipeline JSON is written locally under `docs/artifacts/runs/YYYYMMDD/` (gitignored). After `bash scripts/import_local.sh`, check the latest dated folder for:
+
+| Artifact | Pattern |
+|----------|---------|
+| Run manifest | `run_manifest_*.json` |
+| Validation report | `validation_report_*.json` |
+| Quality audit | `quality_audit_*.json` |
+| Name audit | `name_audit_*.json` |
 | Dedup dropped | `docs/artifacts/dedup/dedup_dropped_{state}.json` |
 
 ---
 
 ## Deployment
 
-Remote sync to vesta:
-
-```bash
-cp deploy/config.example.sh deploy/config.sh   # edit host/credentials
-bash scripts/deploy_vesta.sh
-```
-
-Web search (production): http://107.181.241.82:8004/search/
-
-Status: [docs/project/colleague_merge_status.json](docs/project/colleague_merge_status.json)
+Copy `deploy/config.example.sh` to `deploy/config.sh` (gitignored), set host and PostgreSQL credentials, then use scripts under `deploy/` for rsync and merge. See [docs/guides/IMPORT_RUNBOOK.md](docs/guides/IMPORT_RUNBOOK.md).
 
 ---
 
@@ -168,6 +159,5 @@ Status: [docs/project/colleague_merge_status.json](docs/project/colleague_merge_
 - [docs/guides/WORKFLOW.md](docs/guides/WORKFLOW.md) — operator runbook
 - [docs/guides/DATA_INVENTORY.md](docs/guides/DATA_INVENTORY.md) — columns and quality
 - [docs/guides/STATE_MAPPING.md](docs/guides/STATE_MAPPING.md) — per-state field mapping
+- [docs/project/uncovered_states.json](docs/project/uncovered_states.json) — 12 states not yet integrated
 - [sources/CONTRIBUTORS.yaml](sources/CONTRIBUTORS.yaml) — contributor registry
-
-See [docs/project/RELEASE_STATUS.md](docs/project/RELEASE_STATUS.md) for release checklist and known limitations.

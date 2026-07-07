@@ -30,11 +30,11 @@ flowchart LR
 
 ## What is canonical?
 
-**Canonical** paths are the only inputs/outputs used by `python3 -m src.pipeline` and vesta deploy:
+**Canonical** paths are the only inputs/outputs used by `python3 -m src.pipeline` and remote deploy:
 
 | Path | Contents |
 |------|----------|
-| `data/raw/` | 42 source files (39 states + LEIE + reference PDF) |
+| `data/raw/` | 41 source files (39 states + LEIE; state PDFs/xlsx/csv) |
 | `data/processed/` | State-native `*_raw.csv` |
 | `data/cleaned/` | OIG-mapped `*_oig.csv` + `federal_oig.csv` |
 | `src/convert/` | Per-state converters + `federal_leie.py` |
@@ -47,9 +47,8 @@ flowchart LR
 |------|------|
 | `../colleague-repos/` | Local git clones for diff; **not** read by pipeline |
 | `sources/` | Contributor registry (YAML + README per person) |
-| `docs/scans/` | One-time colleague repo scan JSON |
-| `docs/project/` | Deploy status, audit snapshots |
-| `colleague-repos/` (removed) | Was in-repo; moved outside — see `sources/README.md` |
+| `docs/project/` | Public policy only (`uncovered_states.json`); other ops notes stay local |
+| `docs/artifacts/` | Local pipeline JSON (gitignored; regenerable) |
 
 **Rule:** Copy raw files from colleague repos into `data/raw/` with exact names, then run ETL. Never load colleague cleaned CSVs directly.
 
@@ -58,12 +57,8 @@ flowchart LR
 ```
 docs/
 ├── guides/           # Human-readable runbooks (WORKFLOW, STATE_MAPPING, …)
-├── project/          # colleague_merge_status.json, vesta audits
-├── artifacts/
-│   ├── latest -> runs/YYYYMMDD/
-│   ├── runs/         # Pipeline JSON (manifest, validation, quality, name audit)
-│   └── dedup/        # dedup_dropped_{state}.json
-└── scans/            # Colleague repo scans
+├── project/          # uncovered_states.json (12 states not yet integrated)
+└── artifacts/        # Local pipeline JSON (gitignored)
 ```
 
 ## Contributors (39 + LEIE)
@@ -88,7 +83,7 @@ python3 -m pytest tests/ -q
 python3 -m src.pipeline --skip-db          # convert + validate
 python3 -m src.pipeline                    # full + PostgreSQL
 bash scripts/import_local.sh --states-only
-bash scripts/deploy_vesta.sh               # optional remote deploy
+bash deploy/sync_and_merge_noninteractive.sh   # optional remote deploy
 ```
 
-Status file: [`docs/project/colleague_merge_status.json`](../project/colleague_merge_status.json).
+Uncovered states: [`docs/project/uncovered_states.json`](../project/uncovered_states.json).

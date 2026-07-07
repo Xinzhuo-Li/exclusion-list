@@ -11,7 +11,7 @@ local_total_records: 256776
 contributors:
   - id: xinzhuo-li
     name: Xinzhuo Li
-    github: https://github.com/Xinzhuo-Li/medicaid-exclusion-list
+    github: https://github.com/Xinzhuo-Li/exclusion-list
     integrated_at: "2026-06"
     cleaned_records: 8575
     states: [MD, MA, MI, MS, MT, NE]

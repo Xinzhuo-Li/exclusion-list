@@ -1,13 +1,13 @@
 # Exclusion List ETL — Issues, Resolutions & Decisions
 # 医疗 Exclusion List ETL — 问题、解决方案与决策事项
 
-**Project / 项目:** Six-State Medical Exclusion List Merge (MD, MA, MI, MS, MT, NE)  
-**六州医疗 Exclusion List 合并（MD, MA, MI, MS, MT, NE）**
+**Project / 项目:** 39-State Medicaid Exclusion List + Federal LEIE  
+**三十九州 Medicaid Exclusion List + 联邦 LEIE**
 
-**Status / 状态:** Leadership decisions confirmed; PostgreSQL deployed; ready for six-state delivery  
-**领导决策已确认；PostgreSQL 已部署；六州范围可交付**
+**Status / 状态:** Production baseline 256,776 records (173,312 state + 83,464 OIG); Django web search deployed  
+**生产基线 256,776 条（州 173,312 + OIG 83,464）；Django 搜索已部署**
 
-**Cleaned records / 清洗后记录总数:** 8,575
+**Cleaned records / 清洗后记录总数:** 256,776 (2026-07-07)
 
 ---
 
@@ -74,8 +74,8 @@
 
 | | |
 |---|---|
-| **EN** | **Confirmed:** After merge, `exclusion_main` row count and all business columns must match `cleaned_staging` exactly for the six states. Merge uses DELETE-then-INSERT from `cleaned_staging`. Verification: `sql/04_verify_main_sync.sql`. |
-| **中文** | **已确认：** 合并后 `exclusion_main` 行数及全部业务字段必须与 `cleaned_staging` 完全一致。合并方式为 DELETE 后从 `cleaned_staging` INSERT。验证脚本：`sql/04_verify_main_sync.sql`。 |
+| **EN** | **Confirmed:** After merge, `exclusion_main` row count and all business columns must match `cleaned_staging` exactly for each loaded `list_source` + `source_state` slice. Merge uses DELETE-then-INSERT from `cleaned_staging`. Verification: `sql/04_verify_main_sync.sql`. |
+| **中文** | **已确认：** 合并后 `exclusion_main` 行数及全部业务字段必须与 `cleaned_staging` 完全一致（按 `list_source` + `source_state` 分片）。合并方式为 DELETE 后从 `cleaned_staging` INSERT。验证脚本：`sql/04_verify_main_sync.sql`。 |
 
 ---
 
@@ -102,13 +102,13 @@
 |---|---|---|
 | **Resolved** | Michigan dual-date; MS indefinite REINDATE; dedup logic; MD legend filter; MT alias names; EXCLTYPE exact-match | Michigan 双日期；MS 无限期 REINDATE；去重逻辑；MD 图例过滤；MT 别名；EXCLTYPE 精确匹配 |
 | **Decisions confirmed** | Full-name TEXT; empty EXCLDATE = long-term; retain cross-state NPI rows; strict main/staging sync | 全名 TEXT；空 EXCLDATE=长期；保留跨州 NPI；main 严格同步 staging |
-| **Deployed** | PostgreSQL on vesta (port 5433); 6 stage tables + cleaned_staging + exclusion_main (8,575 rows) | PostgreSQL 已部署；6 张 stage 表 + cleaned_staging + exclusion_main（8,575 行） |
-| **GitHub** | https://github.com/Xinzhuo-Li/medicaid-exclusion-list | 代码已上传 GitHub |
+| **Deployed** | PostgreSQL `exclusion_main` with 256,776 rows; Django web search (`web/`) | PostgreSQL `exclusion_main` 256,776 行；Django 搜索（`web/`） |
+| **GitHub** | https://github.com/Xinzhuo-Li/exclusion-list | 代码已上传 GitHub |
 
 ---
 
-## Appendix — Record Counts by State
-## 附录 — 各州记录数
+## Appendix — Original six states (Xinzhuo Li milestone)
+## 附录 — 最初六州（Xinzhuo Li 里程碑）
 
 | State | Source rows / 源文件行数 | Cleaned records / 清洗后记录 | Notes / 备注 |
 |---|---|---|---|

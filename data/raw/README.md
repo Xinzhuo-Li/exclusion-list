@@ -94,7 +94,7 @@ When `LEIE.csv` is present, the pipeline also builds `data/cleaned/federal_oig.c
 ## After updating source files
 
 1. Run: `python3 -m src.pipeline --skip-db` (or full pipeline with PostgreSQL).
-2. Check `docs/artifacts/latest/run_manifest_*.json` for SHA256 fingerprints.
+2. Check `docs/artifacts/runs/YYYYMMDD/run_manifest_*.json` for SHA256 fingerprints.
 3. If record counts change intentionally, update `STATE_EXPECTATIONS` in `src/validate/check_import.py` and counts in `docs/guides/DATA_INVENTORY.md`.
 
 See [docs/guides/WORKFLOW.md](../guides/WORKFLOW.md) for the full step-by-step guide.

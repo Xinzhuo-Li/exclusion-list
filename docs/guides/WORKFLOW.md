@@ -1,11 +1,11 @@
 # ETL Workflow Runbook
 
-**23-state import guide:** see [IMPORT_RUNBOOK.md](IMPORT_RUNBOOK.md) for scripts and colleague merge checklist.  
+**39-state import guide:** see [IMPORT_RUNBOOK.md](IMPORT_RUNBOOK.md).  
 **Name fields:** [NAME_HANDLING.md](NAME_HANDLING.md).
 
 Detailed operator guide for the Medicaid exclusion list pipeline. For a quick start, see [README.md](../README.md).
 
-**Repository:** https://github.com/Xinzhuo-Li/medicaid-exclusion-list
+**Repository:** https://github.com/Xinzhuo-Li/exclusion-list
 
 ---
 
@@ -13,8 +13,8 @@ Detailed operator guide for the Medicaid exclusion list pipeline. For a quick st
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/Xinzhuo-Li/medicaid-exclusion-list.git
-   cd medicaid-exclusion-list
+   git clone https://github.com/Xinzhuo-Li/exclusion-list.git
+   cd exclusion-list
    ```
 
 2. **Install Python dependencies** (Python 3.10+ required)
@@ -22,7 +22,7 @@ Detailed operator guide for the Medicaid exclusion list pipeline. For a quick st
    pip3 install -r requirements.txt
    ```
 
-3. **Verify source files** — confirm all seven files exist in `data/raw/` (see [data/raw/README.md](../data/raw/README.md)).
+3. **Verify source files** — confirm all 41 raw files exist in `data/raw/` (see [data/raw/README.md](../data/raw/README.md)).
 
 4. **Configure PostgreSQL** (skip if using `--skip-db` only)
    ```bash
@@ -209,7 +209,7 @@ python3 -m src.load.load_to_postgres
 
 ## Step 5 — Merge & Verify Sync
 
-**Purpose:** Replace six-state rows in `exclusion_main` from `cleaned_staging`, then assert strict sync.
+**Purpose:** Replace loaded state/federal slices in `exclusion_main` from `cleaned_staging`, then assert strict sync.
 
 **Automatic:** Final steps of `python3 -m src.pipeline`.
 
@@ -237,7 +237,7 @@ When a state publishes a new exclusion list:
 
 1. Replace the file in `data/raw/` (keep the exact filename).
 2. Run `python3 -m src.pipeline --skip-db`.
-3. Review new counts in terminal output and `docs/artifacts/latest/validation_report_*.json`.
+3. Review new counts in terminal output and the latest `docs/artifacts/runs/YYYYMMDD/validation_report_*.json`.
 4. If counts changed **intentionally**, update baselines in two places:
    - `STATE_EXPECTATIONS` in `src/validate/check_import.py` (`processed_expected`, `cleaned_expected`)
    - Record counts table in `docs/guides/DATA_INVENTORY.md`
@@ -305,7 +305,7 @@ For syncing to a Linux server (e.g. production PostgreSQL on vesta):
 
 1. Copy `deploy/config.example.sh` to `deploy/config.sh` (gitignored).
 2. Set `DEPLOY_HOST`, `DEPLOY_REMOTE_DIR`, `PGPORT`.
-3. Use `deploy/sync_and_merge.sh` to rsync code and run load + merge on the server.
+3. Use `deploy/sync_and_merge_noninteractive.sh` to rsync code and run load + merge on the server.
 
 See scripts in `deploy/` for server setup, upload, and verification helpers. These scripts are environment-specific (SSH host, Mac `expect`/`osascript` prompts) — adapt before use on other machines.
 

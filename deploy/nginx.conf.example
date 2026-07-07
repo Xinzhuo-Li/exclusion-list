@@ -3,12 +3,12 @@
 
 server {
     listen 80;
-    server_name 107.181.241.82 vesta.example.com;
+    server_name your.server.example;
 
     client_max_body_size 4M;
 
     location /static/ {
-        alias /home/aiden/exclusion-list/web/staticfiles/;
+        alias /home/USER/exclusion-list/web/staticfiles/;
     }
 
     location / {

@@ -12,7 +12,7 @@ This directory maps **five contributors + federal LEIE** to the canonical ETL pa
 
 ## Refresh colleague clones
 
-Colleague repos live **outside** the git tree (see `merge_colleague_state.sh`):
+Colleague repos live **outside** the git tree under `../colleague-repos/`:
 
 ```bash
 CLONE_ROOT="../colleague-repos"   # sibling to this repo under ~/Documents/emrts/
@@ -32,17 +32,11 @@ git clone --depth 1 https://github.com/FredericYan02/medicaid-provider-data-clea
 
 To integrate new raw files from a clone, copy into `data/raw/` with exact filenames from [`data/raw/README.md`](../data/raw/README.md), then run the pipeline — **never** import colleague cleaned CSVs directly.
 
-Refresh upstream clones (pull only, no auto-copy):
-
-```bash
-bash scripts/pull_colleague_raw.sh
-bash scripts/pull_colleague_raw.sh --help
-```
+Refresh upstream clones manually with `git pull` inside each clone directory.
 
 ## Files
 
 - [`CONTRIBUTORS.yaml`](CONTRIBUTORS.yaml) — single registry (states, raw filenames, converter modules)
 - `*/README.md` — per-contributor notes
-- `*/scan.json` or `docs/scans/` — one-time repo scan summaries
 
 See also [`docs/guides/PROJECT_LAYOUT.md`](../docs/guides/PROJECT_LAYOUT.md).
