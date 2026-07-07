@@ -1,84 +1,84 @@
-{% extends "base.html" %}
-{% load state_labels %}
-
-{% block title %}Search — Medicaid Exclusion List{% endblock %}
-
-{% block content %}
-<h1 class="mb-4">Search Exclusion List</h1>
-
-<form method="get" class="card shadow-sm mb-4">
-  <div class="card-body">
-    <div class="row g-3">
-      <div class="col-md-6">
-        <label for="q" class="form-label">Name</label>
-        <input type="text" class="form-control" id="q" name="q" value="{{ params.q }}" placeholder="First, middle, last, or business name">
-      </div>
-      <div class="col-md-6">
-        <label for="npi" class="form-label">NPI</label>
-        <input type="text" class="form-control" id="npi" name="npi" value="{{ params.npi }}" maxlength="10" placeholder="10-digit NPI">
-      </div>
-    </div>
-    <div class="mt-3 d-flex gap-2">
-      <button type="submit" class="btn btn-primary">Search</button>
-      <a href="{% url 'search' %}" class="btn btn-outline-secondary">Clear</a>
-    </div>
-  </div>
-</form>
-
-{% if has_search %}
-  {% if results %}
-  <p class="text-muted">{{ total_count|floatformat:0 }} result(s) found</p>
-  <div class="table-responsive">
-    <table class="table table-hover table-sm align-middle">
-      <thead class="table-light">
-        <tr>
-          <th>Name / Organization</th>
-          <th>NPI</th>
-          <th>Source</th>
-          <th>State</th>
-          <th>Excl. Date</th>
-          <th>Type</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for record in results %}
-        <tr>
-          <td>{{ record.display_name }}</td>
-          <td><code>{{ record.npi|default:"—" }}</code></td>
-          <td>{{ record.source_state|state_label }} <span class="text-muted">({{ record.source_state }})</span></td>
-          <td>{{ record.state|default:"—" }}</td>
-          <td>{{ record.excldate|default:"—" }}</td>
-          <td>{{ record.excltype|default:"—" }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  {% if page_obj.has_other_pages %}
-  <nav aria-label="Search results pages">
-    <ul class="pagination">
-      {% if page_obj.has_previous %}
-      <li class="page-item">
-        <a class="page-link" href="?{{ query_string }}{% if query_string %}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
-      </li>
-      {% endif %}
-      <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
-      {% if page_obj.has_next %}
-      <li class="page-item">
-        <a class="page-link" href="?{{ query_string }}{% if query_string %}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
-      </li>
-      {% endif %}
-    </ul>
-  </nav>
-  {% endif %}
-
-  {% else %}
-  <div class="alert alert-warning">
-    No records matched your search. Try a different name or check NPI format (10 digits).
-  </div>
-  {% endif %}
-{% else %}
-  <p class="text-muted">Enter a name or NPI above to query the exclusion list.</p>
-{% endif %}
-{% endblock %}
+{% extends "base.html" %}
+{% load state_labels %}
+
+{% block title %}Search — Medicare/Medicaid Exclusion List{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Search Exclusion List</h1>
+
+<form method="get" class="card shadow-sm mb-4">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label for="q" class="form-label">Name</label>
+        <input type="text" class="form-control" id="q" name="q" value="{{ params.q }}" placeholder="First, middle, last, or business name">
+      </div>
+      <div class="col-md-6">
+        <label for="npi" class="form-label">NPI</label>
+        <input type="text" class="form-control" id="npi" name="npi" value="{{ params.npi }}" maxlength="10" placeholder="10-digit NPI">
+      </div>
+    </div>
+    <div class="mt-3 d-flex gap-2">
+      <button type="submit" class="btn btn-primary">Search</button>
+      <a href="{% url 'search' %}" class="btn btn-outline-secondary">Clear</a>
+    </div>
+  </div>
+</form>
+
+{% if has_search %}
+  {% if results %}
+  <p class="text-muted">{{ total_count|floatformat:0 }} result(s) found</p>
+  <div class="table-responsive">
+    <table class="table table-hover table-sm align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Name / Organization</th>
+          <th>NPI</th>
+          <th>Source</th>
+          <th>State</th>
+          <th>Excl. Date</th>
+          <th>Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in results %}
+        <tr>
+          <td>{{ record.display_name }}</td>
+          <td><code>{{ record.npi|default:"—" }}</code></td>
+          <td>{{ record.source_state|state_label }} <span class="text-muted">({{ record.source_state }})</span></td>
+          <td>{{ record.state|default:"—" }}</td>
+          <td>{{ record.excldate|default:"—" }}</td>
+          <td>{{ record.excltype|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+  <nav aria-label="Search results pages">
+    <ul class="pagination">
+      {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?{{ query_string }}{% if query_string %}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+      </li>
+      {% endif %}
+      <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?{{ query_string }}{% if query_string %}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+
+  {% else %}
+  <div class="alert alert-warning">
+    No records matched your search. Try a different name or check NPI format (10 digits).
+  </div>
+  {% endif %}
+{% else %}
+  <p class="text-muted">Enter a name or NPI above to query the exclusion list.</p>
+{% endif %}
+{% endblock %}

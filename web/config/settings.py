@@ -113,7 +113,7 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Medicaid Exclusion List API",
+    "TITLE": "Medicare/Medicaid Exclusion List API",
     "DESCRIPTION": "Search state Medicaid provider exclusion records.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,

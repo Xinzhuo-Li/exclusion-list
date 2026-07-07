@@ -132,13 +132,18 @@ def get_sources() -> list[dict[str, Any]]:
     return sources
 
 
+def _source_sort_key(code: str) -> tuple[int, str]:
+    """Federal LEIE (OIG) first; remaining sources alphabetical."""
+    return (0, "") if code == "OIG" else (1, code)
+
+
 def get_stats() -> dict[str, Any]:
     total = ExclusionRecord.objects.count()
     by_source = list(
         ExclusionRecord.objects.values("source_state")
         .annotate(count=Count("id"))
-        .order_by("source_state")
     )
+    by_source.sort(key=lambda row: _source_sort_key(row["source_state"]))
     return {
         "total_records": total,
         "source_count": len(by_source),
