@@ -7,15 +7,18 @@
 
 <section class="mb-4">
   <h2 class="h4">Web Search</h2>
-  <p>Use the <a href="{% url 'search' %}">Search</a> page to query exclusion records. Two filters are available:</p>
+  <p>Use the <a href="{% url 'search' %}">Search</a> page to query exclusion records. Filters:</p>
   <ul>
-    <li><strong>Name</strong> — partial match on first name, middle name, last name, or business name</li>
+    <li><strong>First name</strong> — partial match on <code>firstname</code></li>
+    <li><strong>Middle name</strong> — partial match on <code>midname</code></li>
+    <li><strong>Last name</strong> — partial match on <code>lastname</code></li>
+    <li><strong>Business name</strong> — partial match on <code>busname</code></li>
     <li><strong>NPI</strong> — exact 10-digit National Provider Identifier</li>
   </ul>
   <p class="text-muted mb-0">
-    Reinstated providers are included in search results by default.
-    Source state, list type, and date filters are not available on the search form;
-    use the result table columns to review those fields after a match.
+    Multiple name fields are combined with <strong>AND</strong> (all filled fields must match).
+    Reinstated providers are included by default.
+    Use the result table to review source state and exclusion type after a match.
   </p>
 </section>
 
@@ -25,18 +28,21 @@
   <p><a class="btn btn-outline-primary" href="/api/docs/">Open API Documentation</a></p>
 
   <h3 class="h5 mt-3">Search parameters</h3>
-  <p>Only <code>q</code> (or <code>name</code>) and <code>npi</code> are supported for filtering exclusions.
-  Other query parameters are ignored.</p>
+  <p>Use <code>firstname</code>, <code>midname</code>, <code>lastname</code>, <code>busname</code>, and <code>npi</code>.
+  Name fields use AND logic; other query parameters are ignored.</p>
 
   <h3 class="h5 mt-3">Example Requests</h3>
   <pre class="bg-light p-3 rounded"><code># Search by NPI
 curl "{{ base_url }}/api/v1/exclusions/?npi=1234567890"
 
-# Search by name (matches first, middle, last, or business name)
-curl "{{ base_url }}/api/v1/exclusions/?q=Smith"
+# Search by last name
+curl "{{ base_url }}/api/v1/exclusions/?lastname=Smith"
 
-# API alias for name
-curl "{{ base_url }}/api/v1/exclusions/?name=Action+Pharmacy"
+# Narrow with first + last name (AND)
+curl "{{ base_url }}/api/v1/exclusions/?lastname=Smith&amp;firstname=John"
+
+# Business name
+curl "{{ base_url }}/api/v1/exclusions/?busname=Pharmacy"
 
 # List data sources
 curl "{{ base_url }}/api/v1/sources/"

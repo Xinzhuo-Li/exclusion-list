@@ -6,13 +6,13 @@ from exclusions.queries import SearchParams, parse_search_params, search_exclusi
 def test_parse_search_params_strips():
     params = parse_search_params(
         {
-            "q": "  Smith  ",
-            "name": "  Jones  ",
+            "firstname": "  John  ",
+            "lastname": "  Smith  ",
             "npi": "1234567890",
         }
     )
-    assert params.q == "Smith"
-    assert params.name == "Jones"
+    assert params.firstname == "John"
+    assert params.lastname == "Smith"
     assert params.npi == "1234567890"
 
 
@@ -25,14 +25,15 @@ def test_parse_search_params_ignores_legacy_filters():
     params = parse_search_params(
         {
             "q": "Smith",
+            "name": "Jones",
+            "lastname": "Smith",
             "source_state": "MD",
             "list_source": "state",
             "include_reinstated": "1",
             "excldate_from": "20200101",
         }
     )
-    assert params.q == "Smith"
-    assert params == SearchParams(q="Smith")
+    assert params == SearchParams(lastname="Smith")
 
 
 @pytest.mark.django_db
@@ -59,7 +60,7 @@ def test_search_exclusions_name_matches_lastname():
         pytest.skip("no records with lastname in exclusion_main")
 
     token = sample.lastname[: min(4, len(sample.lastname))]
-    results = search_exclusions(SearchParams(q=token))
+    results = search_exclusions(SearchParams(lastname=token))
     assert results.filter(id=sample.id).exists()
 
 
@@ -72,7 +73,7 @@ def test_search_exclusions_name_matches_midname():
         pytest.skip("no records with midname in exclusion_main")
 
     token = sample.midname[: min(4, len(sample.midname))]
-    results = search_exclusions(SearchParams(q=token))
+    results = search_exclusions(SearchParams(midname=token))
     assert results.filter(id=sample.id).exists()
 
 
@@ -85,8 +86,30 @@ def test_search_exclusions_name_matches_busname():
         pytest.skip("no records with busname in exclusion_main")
 
     token = sample.busname[: min(6, len(sample.busname))]
-    results = search_exclusions(SearchParams(q=token))
+    results = search_exclusions(SearchParams(busname=token))
     assert results.filter(id=sample.id).exists()
+
+
+@pytest.mark.django_db
+def test_search_exclusions_and_narrows_results():
+    from exclusions.models import ExclusionRecord
+
+    sample = (
+        ExclusionRecord.objects.exclude(lastname="")
+        .exclude(firstname="")
+        .first()
+    )
+    if sample is None:
+        pytest.skip("no records with both first and last name in exclusion_main")
+
+    last_token = sample.lastname[: min(4, len(sample.lastname))]
+    first_token = sample.firstname[: min(4, len(sample.firstname))]
+    by_last = search_exclusions(SearchParams(lastname=last_token))
+    by_both = search_exclusions(
+        SearchParams(lastname=last_token, firstname=first_token)
+    )
+    assert by_both.filter(id=sample.id).exists()
+    assert by_both.count() <= by_last.count()
 
 
 @pytest.mark.django_db
@@ -97,13 +120,11 @@ def test_search_includes_reinstated_by_default():
     if reinstated is None:
         pytest.skip("no Reinstated rows in exclusion_main")
 
-    name_token = (
-        reinstated.busname[:6]
-        if reinstated.busname.strip()
-        else reinstated.lastname[:4]
-    )
-    if not name_token:
+    if reinstated.busname.strip():
+        results = search_exclusions(SearchParams(busname=reinstated.busname[:6]))
+    elif reinstated.lastname.strip():
+        results = search_exclusions(SearchParams(lastname=reinstated.lastname[:4]))
+    else:
         pytest.skip("reinstated row has no searchable name fields")
 
-    results = search_exclusions(SearchParams(q=name_token))
     assert results.filter(id=reinstated.id).exists()

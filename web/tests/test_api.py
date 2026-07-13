@@ -62,11 +62,14 @@ def test_search_page(client):
     response = client.get("/search/")
     assert response.status_code == 200
     content = response.content.decode()
-    assert 'name="q"' in content
-    assert 'name="npi"' in content
+    for field in ("firstname", "midname", "lastname", "busname", "npi"):
+        assert f'name="{field}"' in content
+    assert 'name="q"' not in content
     assert 'name="source_state"' not in content
     assert 'name="list_source"' not in content
     assert 'name="include_reinstated"' not in content
+    assert 'href="/"' in content
+    assert "Back to Home" in content
 
 
 @pytest.mark.django_db

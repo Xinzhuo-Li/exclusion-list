@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from django.db.models import Count, Max, Q, QuerySet
+from django.db.models import Count, Max, QuerySet
 
 from .models import DataSource, ExclusionRecord
 
@@ -55,15 +55,19 @@ STATE_NAMES = {
 
 @dataclass
 class SearchParams:
-    q: str = ""
-    name: str = ""  # API alias; web form uses q
+    firstname: str = ""
+    midname: str = ""
+    lastname: str = ""
+    busname: str = ""
     npi: str = ""
 
 
 def parse_search_params(data: dict[str, Any]) -> SearchParams:
     return SearchParams(
-        q=(data.get("q") or "").strip(),
-        name=(data.get("name") or "").strip(),
+        firstname=(data.get("firstname") or "").strip(),
+        midname=(data.get("midname") or "").strip(),
+        lastname=(data.get("lastname") or "").strip(),
+        busname=(data.get("busname") or "").strip(),
         npi=(data.get("npi") or "").strip(),
     )
 
@@ -71,15 +75,14 @@ def parse_search_params(data: dict[str, Any]) -> SearchParams:
 def search_exclusions(params: SearchParams) -> QuerySet[ExclusionRecord]:
     qs = ExclusionRecord.objects.all()
 
-    name_query = params.name or params.q
-    if name_query:
-        qs = qs.filter(
-            Q(lastname__icontains=name_query)
-            | Q(firstname__icontains=name_query)
-            | Q(midname__icontains=name_query)
-            | Q(busname__icontains=name_query)
-        )
-
+    if params.firstname:
+        qs = qs.filter(firstname__icontains=params.firstname)
+    if params.midname:
+        qs = qs.filter(midname__icontains=params.midname)
+    if params.lastname:
+        qs = qs.filter(lastname__icontains=params.lastname)
+    if params.busname:
+        qs = qs.filter(busname__icontains=params.busname)
     if params.npi:
         qs = qs.filter(npi=params.npi)
 

@@ -16,14 +16,26 @@ from .serializers import (
 @extend_schema(
     parameters=[
         OpenApiParameter(
-            name="q",
-            description="Partial match on first, middle, last, or business name.",
+            name="firstname",
+            description="Partial match on first name (AND with other name fields).",
             required=False,
             type=str,
         ),
         OpenApiParameter(
-            name="name",
-            description="API alias for q — same name matching behavior.",
+            name="midname",
+            description="Partial match on middle name (AND with other name fields).",
+            required=False,
+            type=str,
+        ),
+        OpenApiParameter(
+            name="lastname",
+            description="Partial match on last name (AND with other name fields).",
+            required=False,
+            type=str,
+        ),
+        OpenApiParameter(
+            name="busname",
+            description="Partial match on business name (AND with other name fields).",
             required=False,
             type=str,
         ),

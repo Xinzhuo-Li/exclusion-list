@@ -4,16 +4,31 @@
 {% block title %}Search — Medicare/Medicaid Exclusion List{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Search Exclusion List</h1>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h1 class="mb-0">Search Exclusion List</h1>
+  <a href="{% url 'home' %}" class="btn btn-outline-secondary">Back to Home</a>
+</div>
 
 <form method="get" class="card shadow-sm mb-4">
   <div class="card-body">
     <div class="row g-3">
-      <div class="col-md-6">
-        <label for="q" class="form-label">Name</label>
-        <input type="text" class="form-control" id="q" name="q" value="{{ params.q }}" placeholder="First, middle, last, or business name">
+      <div class="col-md-6 col-lg-3">
+        <label for="firstname" class="form-label">First name</label>
+        <input type="text" class="form-control" id="firstname" name="firstname" value="{{ params.firstname }}" placeholder="Partial match">
       </div>
-      <div class="col-md-6">
+      <div class="col-md-6 col-lg-3">
+        <label for="midname" class="form-label">Middle name</label>
+        <input type="text" class="form-control" id="midname" name="midname" value="{{ params.midname }}" placeholder="Partial match">
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <label for="lastname" class="form-label">Last name</label>
+        <input type="text" class="form-control" id="lastname" name="lastname" value="{{ params.lastname }}" placeholder="Partial match">
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <label for="busname" class="form-label">Business name</label>
+        <input type="text" class="form-control" id="busname" name="busname" value="{{ params.busname }}" placeholder="Partial match">
+      </div>
+      <div class="col-md-6 col-lg-4">
         <label for="npi" class="form-label">NPI</label>
         <input type="text" class="form-control" id="npi" name="npi" value="{{ params.npi }}" maxlength="10" placeholder="10-digit NPI">
       </div>
@@ -75,10 +90,10 @@
 
   {% else %}
   <div class="alert alert-warning">
-    No records matched your search. Try a different name or check NPI format (10 digits).
+    No records matched your search. Try different name fields or check NPI format (10 digits).
   </div>
   {% endif %}
 {% else %}
-  <p class="text-muted">Enter a name or NPI above to query the exclusion list.</p>
+  <p class="text-muted">Enter one or more name fields or an NPI above to query the exclusion list.</p>
 {% endif %}
 {% endblock %}
